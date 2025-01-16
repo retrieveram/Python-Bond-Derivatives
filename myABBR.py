@@ -30,7 +30,7 @@ fmtSCF = {'amount':'{:,.2f}','atmFWD':'{:.6%}','coupon':'{:.6%}',
           'zeroRT':'{:.6%}'}
 fmtFUT = {'BPV':'{:.4f}',   'CF':'{:.5f}',      'cleanPRC':'{:.4f}',
           'coupon':'{:.4%}','dirtyPRC':'{:.4f}','gBASIS':'{:.4f}',
-          'yield':'{:.4f}'}
+          'yield':'{:.4f}', 'amount':'{:,.4f}', 'accruAMT':'{:,.4f}'}
 
 #---- E. 日付関連メソッドの短縮形 ----
 # Days, Months, Years
@@ -117,7 +117,6 @@ rcvRTs  = 0.20    # subordinate
 cpn025  = 0.0025
 cpn100  = 0.01
 cpn500  = 0.05
-npv0    = 0.0
 bP      = ql.Protection.Buyer  # 0
 sP      = ql.Protection.Seller # 1
 # others

@@ -28,9 +28,9 @@ fmtSCF = {'amount':'{:,.2f}','atmFWD':'{:.6%}','coupon':'{:.6%}',
           'NPV':'{:,.2f}',   'matYR':'{:,.4f}','parRT':'{:.6%}',
           'rate':'{:.6%}',   'shftRT':'{:.6%}','spread':'{:.3%}',
           'zeroRT':'{:.6%}'}
-fmtFUT = {'BPV':'{:.4f}',   'CF':'{:.5f}',      'cleanPRC':'{:.4f}',
-          'coupon':'{:.4%}','dirtyPRC':'{:.4f}','gBASIS':'{:.4f}',
-          'yield':'{:.4f}', 'amount':'{:,.4f}', 'accruAMT':'{:,.4f}'}
+fmtFUT = {'accruAMT':'{:,.4f}', 'amount':'{:,.4f}',  'BPV':'{:.4f}',
+          'CF':'{:.5f}',        'cleanPRC':'{:.4f}', 'coupon':'{:.4%}',
+          'dirtyPRC':'{:.4f}',  'gBASIS':'{:.4f}',   'yield':'{:.4f}' }
 
 #---- E. 日付関連メソッドの短縮形 ----
 # Days, Months, Years

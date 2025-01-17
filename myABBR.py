@@ -51,9 +51,9 @@ def setEvDT(evaluationDT):
   ql.Settings.instance().evaluationDate = evaluationDT
 # Period 2種類の短縮形
 @singledispatch
-def pD(txt: str):       return ql.Period(txt)
+def pD(txt: str): return ql.Period(txt)
 @pD.register                                   
-def _(nn: int, yy: str):return ql.Period(nn,yy)
+def _(freq: int): return ql.Period(freq)
 
 
 #---- F. 短縮形リスト ----
@@ -79,15 +79,15 @@ Tp1     =  1
 Tp2     =  2
 Tp3     =  3
 # freqency
-freqA   =  ql.Annual
-freqSA  =  ql.Semiannual
-freqQ   =  ql.Quarterly
-freqD   =  ql.Daily
+freqA   =  ql.Annual                  # 1
+freqSA  =  ql.Semiannual              # 2
+freqQ   =  ql.Quarterly               # 4
+freqD   =  ql.Daily                   # 365
 # tenor (period version for freq)
-pdFreqA =  ql.Period(ql.Annual)
-pdFreqSA=  ql.Period(ql.Semiannual)
-pdFreqQ =  ql.Period(ql.Quarterly)
-pdFreqD =  ql.Period(ql.Daily)
+pdFreqA =  ql.Period(ql.Annual)       # 1Y
+pdFreqSA=  ql.Period(ql.Semiannual)   # 6M
+pdFreqQ =  ql.Period(ql.Quarterly)    # 3M
+pdFreqD =  ql.Period(ql.Daily)        # 1D
 # convension
 mFLLW   =  ql.ModifiedFollowing
 FLLW    =  ql.Following

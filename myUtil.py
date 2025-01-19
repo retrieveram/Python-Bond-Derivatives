@@ -68,7 +68,7 @@ def makeTiborCurve(crvDATA):
   # 1.指標金利オブジェクト
     tbCrvHDL = ql.RelinkableYieldTermStructureHandle() 
     tbrIX    = ql.Tibor(pdFreqSA, tbCrvHDL)
-  # 2. HelperとTONAカーブオブジェクト
+  # 2. HelperとTiborカーブオブジェクト
     cHelper, tbParRT = [], []
     for knd, tnr, rt in crvDATA:
        if knd == 'depo': cHelper.append(ql.DepositRateHelper(sqHDL(rt/100),tbrIX)) 

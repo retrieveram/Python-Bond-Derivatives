@@ -33,11 +33,8 @@ fmtFUT = {'accruAMT':'{:,.4f}', 'amount':'{:,.4f}',  'BPV':'{:.4f}',
           'dirtyPRC':'{:.4f}',  'gBASIS':'{:.4f}',   'yield':'{:.4f}' }
 
 #---- E. 日付関連メソッドの短縮形 ----
-# Days, Months, Years
-DD  =  ql.Days
-WW  =  ql.Weeks
-MM  =  ql.Months
-YY  =  ql.Years
+# Days, Weeks, Months, Years
+DD = ql.Days ;  WW = ql.Weeks ;  MM = ql.Months ;  YY = ql.Years
 # japan日付
 def jDT(yyyy,mm,dd): return ql.Date(dd,mm,yyyy)
 # datetimeクラスからQL Date
@@ -49,11 +46,14 @@ def dayOfWeek(Date): return Date.to_date().strftime('%a')
 # SettingクラスevaluationDate設定
 def setEvDT(evaluationDT):  
   ql.Settings.instance().evaluationDate = evaluationDT
-# Period 2種類の短縮形
+
+# Period 3種類の短縮形
 @singledispatch
-def pD(txt: str): return ql.Period(txt)
-@pD.register                                   
-def _(freq: int): return ql.Period(freq)
+def pD(pdSTR: str):  return ql.Period(pdSTR)
+@pD.register(tuple)
+def _(nnUNT):        return ql.Period(*nnUNT)
+@pD.register(int)
+def _(FRQ):          return ql.Period(FRQ)
 
 
 #---- F. 短縮形リスト ----

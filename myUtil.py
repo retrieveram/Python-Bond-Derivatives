@@ -50,17 +50,17 @@ def makeTonaCurve(crvDATA):
     tnCrvHDL = ql.RelinkableYieldTermStructureHandle()  
     tonaIX = ql.OvernightIndex('TONA', Tp0,   jpyFX, calJP, dcA365, tnCrvHDL)
   # 2. カーブヘルパー
-    cHelper, tnParRATE = [], []
+    cHelper, tnParRT = [], []
     for knd, tnr, rt in crvDATA:
       if knd == 'depo':
           cHelper.append(ql.DepositRateHelper(sqHDL(rt/100),tonaIX)) 
       if knd == 'swap':
           cHelper.append(ql.OISRateHelper(Tp2, pD(tnr), sqHDL(rt/100),tonaIX))
-      tnParRATE.append(rt/100)                                # パーレート用リスト
+      tnParRT.append(rt/100)                                # パーレート用リスト
   # カーブオブジェクト
     tnCrvOBJ = ql.PiecewiseLogLinearDiscount(Tp0, calJP, cHelper, dcA365)
     tnCrvHDL.linkTo(tnCrvOBJ) ; tnCrvOBJ.enableExtrapolation()
-    return [tonaIX, tnCrvOBJ, tnCrvHDL, tnParRATE]        # 4つのオブジェクトを戻す    
+    return [tonaIX, tnCrvOBJ, tnCrvHDL, tnParRT]        # 4つのオブジェクトを戻す    
   
 # TIBORカーブ
 def makeTiborCurve(crvDATA):

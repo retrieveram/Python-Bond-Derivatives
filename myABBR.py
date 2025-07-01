@@ -23,14 +23,14 @@ def nSetF():                     # float5桁表示設定
 def nA(LIST):        return np.array(LIST)
 
 #---- D. pandasスタイル書式用 辞書型変数 ----
-fmtSCF = {'amount':'{:,.2f}','atmFWD':'{:.6%}','coupon':'{:.6%}',
-          'days':'{:.0f}',   'DF':'{:.8f}',    'nominal':'{:,.2f}',
-          'NPV':'{:,.2f}',   'matYR':'{:,.4f}','parRT':'{:.6%}',
-          'rate':'{:.6%}',   'shftRT':'{:.6%}','spread':'{:.3%}',
-          'zeroRT':'{:.6%}'}
-fmtFUT = {'accruAMT':'{:,.4f}', 'amount':'{:,.4f}',  'BPV':'{:.4f}',
-          'CF':'{:.5f}',        'cleanPRC':'{:.4f}', 'coupon':'{:.4%}',
-          'dirtyPRC':'{:.4f}',  'gBASIS':'{:.4f}',   'yield':'{:.4f}' }
+fmtSCF = {'amount':  '{:,.2f}', 'atmFWD':  '{:.6%}', 'coupon':  '{:.6%}',
+          'days':     '{:.0f}', 'DF':      '{:.8f}', 'nominal':'{:,.2f}',
+          'NPV':     '{:,.2f}', 'matYR':  '{:,.4f}', 'parRT':   '{:.6%}',
+          'rate':     '{:.6%}', 'shftRT':  '{:.6%}', 'spread':  '{:.3%}',
+          'zeroRT':   '{:.6%}'}
+fmtFUT = {'accruAMT':'{:,.4f}', 'amount': '{:,.4f}', 'BPV':     '{:.4f}',
+          'CF':       '{:.5f}', 'cleanPRC':'{:.4f}', 'coupon':  '{:.4%}',
+          'dirtyPRC': '{:.4f}', 'gBASIS':  '{:.4f}', 'yield':   '{:.4f}'}
 
 #---- E. 日付関連メソッドの短縮形 ----
 # Days, Weeks, Months, Years
@@ -47,13 +47,13 @@ def dayOfWeek(Date): return Date.to_date().strftime('%a')
 def setEvDT(evaluationDT):  
   ql.Settings.instance().evaluationDate = evaluationDT
 
-# Period 3種類の短縮形
+# Period 3種類の短縮形 (2番目はタプルが引数)
 @singledispatch
-def pD(pdSTR: str):  return ql.Period(pdSTR)
+def pD(pdSTR: str): return ql.Period(pdSTR)  # Period('3M')
 @pD.register(tuple)
-def _(nnUNT):        return ql.Period(*nnUNT)
+def _(nnUNT):       return ql.Period(*nnUNT) # Period((3,MM))
 @pD.register(int)
-def _(FRQ):          return ql.Period(FRQ)
+def _(FRQ):         return ql.Period(FRQ)    # Period(freqQ) 
 
 
 #---- F. 短縮形リスト ----

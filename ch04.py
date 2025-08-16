@@ -40,6 +40,6 @@ def bondCALC(trdDATA, bondDTL, bondCONV):
     ModDUR = ql.BondFunctions.duration(       bondOBJ, iRateOBJ)
     BPV    = ql.BondFunctions.basisPointValue(bondOBJ, iRateOBJ)
     convX  = ql.BondFunctions.convexity(      bondOBJ, iRateOBJ)
-    dfRSK = pd.DataFrame([['マコーレイDur.', MacDUR],['修正Dur.', ModDUR],['BPV', BPV], 
+    dfRSK = pd.DataFrame([['マコーレーDur.', MacDUR],['修正Dur.', ModDUR],['BPV', BPV], 
                           ['Convexity', convX], ],            columns=['計算結果',''])
     return pd.concat([dfPRC, dfRSK], ignore_index=True)

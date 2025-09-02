@@ -1,5 +1,4 @@
 ## Pythonで学ぶ債券・金利デリバティブ <sub>*(QuantLib-Python 入門)*</sub>
-<hr style="border:2px solid black">
 
 ### 正誤表
 

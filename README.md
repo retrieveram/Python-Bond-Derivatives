@@ -13,8 +13,9 @@
 
 ### 追記
 
-- 添付コードはQuantLib-Python ver 1.34で作動確認済み。(最新バージョンでも問題なく作動)
-  - バージョンを指定したQuantLib-Pythonのインストールはpip install QuantLib==1.34 。
+- 添付コードはQuantLib-Python ver 1.34で作動確認済み
+  - バージョンを指定したQuantLib-Pythonのインストールは pip install QuantLib==1.34
+  - 最新バージョンでも問題なく作動するはずだが、未確認
 
 - 10章 図10.7 のプレミアムレグ計算値のズレ  : Sep 2, 2025 調査中
-  - C++のコードを確認する必要がある。
+  - C++のコードを確認するため、時間が必要

@@ -3,10 +3,10 @@
 ### 追記
 
 - 上記コードはQuantLibバージョン1.34で作動確認済み
-  - バージョン1.39で複数の機能修正があり、上記コードが部分的にエラー終了することを確認
+  - バージョン1.39で複数の機能修正があり、上記コードが部分的にエラー終了する
   - pip install QuantLib==1.34 によるバージョン1.34のインストールでエラーは無くなる
   - 現在 最新バージョン用のコードを準備中
-  - QuantLibのバージョンによる機能修正はhttps://github.com/lballabio/QuantLibの右側中段のReleaseを参照
+  - QuantLibのバージョンによる機能修正は https://github.com/lballabio/QuantLib の右側中段のReleaseを参照
     
 - 図1.1表題と1ページ最後の行で「CalendarクラスのコンストラクタJapan」と表現したが、正確には「Calendarクラスを継承したJapanクラスのデフォルトコンストラクタJapan」が正しい。イントロダクションのため、難解な表現を避けた。
 

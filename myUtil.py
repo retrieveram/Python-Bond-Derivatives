@@ -7,6 +7,11 @@ def sqHDL(xx):
   '''sqHDL(xx)=ql.QuoteHandle(ql.SimpleQuote(xx))''' 
   return ql.QuoteHandle(ql.SimpleQuote(xx))
 
+# メイククォート (たぶん、シンプルクォートと同じ)
+def mqHDL(xx):   
+  '''mqHDL(xx)=ql.makeQuoteHandle(xx)''' 
+  return ql.makeQuoteHandle(xx)
+
 # フラットフォワード ** OBJとTSHの2つを戻す点に注意  **
 def ffTSH(settleDT, rate, dc=dcA365, cmpd=2, freq=1):   
   '''ffTSH(settleDT,rate,dc=dcA365,cmpd=2,freq=1) 

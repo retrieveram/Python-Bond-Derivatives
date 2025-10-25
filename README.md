@@ -3,13 +3,13 @@
 ### QuantLibバージョン1.39へのコードの修正
 
 - 本書に記載されたコードはQuantLibバージョン1.34(以下ver1.34等)で作動確認済み
-- ver1.39で複数の機能修正があり、本書記載のコードを以下のように修正
+- ver1.39で複数の機能修正が行われ、本書記載のコードを以下のように修正
   - A.1節 myABBRモジュールの128,9行でver1.35以降でnewVSN=Trueとなるフラッグを導入
   - 債券オブジェクトのbondYieldメソッドが仕様変更されたため、myABBRモジュール 131行目で債券のcleanPrice(クリーン価格)クラスを戻す関数cP(...)を設定
-    - def cP(prc): return ql.BondPrice(prc, ql.BondPrice.Clean)
-    - 図4.2の13行目はこの関数により、97.0をcP(97.0)と修正
-  - 図9.11の5行目のunderlyingSwapメソッドがunderlyingメソッドと修正されたため、同行のコードはnewVSNを使い、3項演算子で記述
-  - 図4.18のAssetSwapクラスはver1.39で目標値を算出できなくなったため、計算を止めた(ver1.34では算出可能)
+    - 関数定義は def cP(prc): return ql.BondPrice(prc, ql.BondPrice.Clean)であり、図4.2の13行目はこの関数により、97.0をcP(97.0)へ修正
+  - 図9.11の5行目のunderlyingSwapメソッドがunderlyingメソッドと修正されたため、5行目のコードはnewVSNを使い、3項演算子で記述
+  - 図4.18のAssetSwapクラスはver1.39で目標値を算出できなくなったため、計算を停止中
+    - 計算が正しく行われるようになれば、復活予定 (ver1.34の計算は正しかった)
 
 ### その他 追記
 

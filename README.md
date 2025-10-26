@@ -14,7 +14,7 @@
   - 図9.11の5行目**underlyingSwap**メソッドは**underlying**と修正されたため、5行目コードはnewVSNを使い、3項演算子で記述
 - 上記修正により、添付コードはver1.34～ver1.40で作動を確認済み
   - 各バージョンのインストール方法は添付したch00.ipynbの最初のセルを参照
-- QuantLibの各バージョンの機能修正履歴は https://github.com/lballabio/QuantLib の右側中段のReleaseを参照
+- QuantLibの各バージョンの修正履歴は https://github.com/lballabio/QuantLib の右側中段のReleaseを参照
 
 
 ### その他 追記

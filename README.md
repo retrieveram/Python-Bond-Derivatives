@@ -11,6 +11,7 @@
     - 計算が正しく行われるようになれば、復活予定 (ver1.34の計算は正しかったが、当面は手計算しよう)
   - myABBRモジュールの128,9行でver1.35以降で**newVSN=True**となるバージョン用フラッグを導入
   - 図9.11の5行目**underlyingSwap**メソッドは**underlying**と修正されたため、5行目コードはnewVSNを使い、3項演算子で記述
+- 上記修正により、添付コードはver1.34～ver1.40で作動を確認済み
 - QuantLibの各バージョンの機能修正履歴は https://github.com/lballabio/QuantLib の右側中段のReleaseを参照
 - 本書において、手計算を再現出来ていないQuantLibクラスは使用していない
 

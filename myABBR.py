@@ -82,7 +82,6 @@ Tp3     =  3
 freqA   =  ql.Annual                  # 1
 freqSA  =  ql.Semiannual              # 2
 freqQ   =  ql.Quarterly               # 4
-freqM   =  ql.Monthly                 # 12
 freqD   =  ql.Daily                   # 365
 # tenor (period version for freq)
 pdFreqA =  ql.Period(ql.Annual)       # 1Y
@@ -124,9 +123,6 @@ sP      = ql.Protection.Seller # 1
 parPR   = 100.0
 parAMT  = 100.0
 
-#---- G. version1.35以上でnewVSN=True ----
-from packaging import version
-newVSN = True if version.parse(ql.__version__) > version.parse("1.34") else False
 # クリーン価格、ダーティー価格
 def cP(prc): return ql.BondPrice(prc, ql.BondPrice.Clean)
 def dP(prc): return ql.BondPrice(prc, ql.BondPrice.Dirty)

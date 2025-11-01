@@ -1,4 +1,7 @@
 ## Pythonで学ぶ債券・金利デリバティブ <sub>*(QuantLib-Python 入門)*</sub>
+- 添付ファイルで、拡張子.ipynbがJupyter Notebook用のファイル
+- myABBR.pyとmyUtil.pyはipynbと同じディレクトリに置くこと
+- その他の拡張子.pyのファイルは主にxlwings用
 
 ### QuantLibバージョン1.39へのコード修正 <sub>(Nov01,2025)</sub>
 

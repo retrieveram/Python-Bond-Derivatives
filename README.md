@@ -11,15 +11,15 @@
 - ver1.39のリリースにより、添付コードは次の各点で変更済み
 
   - 債券オブジェクトのbondYieldメソッド、その他に仕様変更があり、A.1節記載のmyABBRモジュール 126行目で**債券価格クラス**を戻す<b>関数cP(...)</b>を設定(cPはclean priceの略)
-    - 図4.2の13行目はこの関数により、97.0を<b>cP(97.0)</b>へ修正  
-      (図4.13のzSpreadも同じ修正をいれた)
+    - 図4.2の13行目はこの関数により、97.0を<b>cP(97.0)</b>へ修正
+    - 図4.13のzSpreadも同じ理由で修正済み
   - 図4.18の**AssetSwap**クラスはRFR指数に対する計算の場合、変動レグスケジュールを設定する仕様に変更。
-    - これに対応するため、2行目で定義した空のfltSCH変数を次のように修正  
+    - この仕様変更のため、図4.18 2行目で定義した空のfltSCH変数を次のように修正  
       fltSCH = ql.Schedule(settleDT, matDT, pdFreqA, calJP, unADJ,unADJ, dtGENb, EoMf)  
       (この引数は図4.2の9行目のbondSCDを多少修正したもの)
-  - 図9.11の5行目**underlyingSwap**メソッドを**underlying**へ修正
-    - もしver1.34で動かす場合、underlyingSwapへ戻すこと
-- 上記修正により、添付コードはver1.39, 1.40で作動を確認済み
+    - 「空のfltSCH変数」とはアセットスワップされる債券のscheduleの指定を意味していた
+  - 図9.11の5行目**underlyingSwap**メソッドを**underlying**へ修正 (もしver1.34で動かす場合、underlyingSwapへ戻すこと)
+- これらの修正により、上のコード群はver1.39, 1.40で作動を確認済み
   - 各バージョンのインストール方法は添付したch00.ipynbの最初のセルを参照
 - QuantLibの各バージョンの修正履歴は https://github.com/lballabio/QuantLib の右側中段のReleaseを参照
 
@@ -27,7 +27,7 @@
 ### (c) その他 追記
 
 - 図1.1表題と1ページ最後の行で「CalendarクラスのコンストラクタJapan」と表現したが、正確には「Calendarクラスを継承したJapanクラスのデフォルトコンストラクタJapan」が正しい。イントロダクションのため、難解な表現を避けた。
-  - 同じ類の記述として、56ページでActual365Fixedを「DayCounterクラスのコンストラクタ」と称した。
+  - 同じ類の記述として、56ページでActual365Fixedを「DayCounterクラスのコンストラクタ」と呼んだ。
 
 - 10章 図10.7 のプレミアムレグ計算値のズレ  : Sep 2, 2025 調査中
   - 現時点ではmailing listからの回答は無し

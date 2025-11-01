@@ -10,8 +10,8 @@
   - 図4.18の**AssetSwap**クラスはRFR指数に対する計算の場合、変動レグスケジュールを設定する仕様に変更。
     - これに対応するため、2行目で定義した空のfltSCH変数を次のように修正  
       fltSCH = ql.Schedule(settleDT, matDT, pdFreqA, calJP, unADJ,unADJ, dtGENb, EoMf)  
-      この設定は図4.2の9行目のbondSCDを多少修正したもの
-  - 図9.11の5行目**underlyingSwap**メソッドは**underlying**に修正
+      (この引数は図4.2の9行目のbondSCDを多少修正したもの)
+  - 図9.11の5行目**underlyingSwap**メソッドを**underlying**へ修正
     - もしver1.34で動かす場合、underlyingSwapへ戻すこと
 - 上記修正により、添付コードはver1.34～ver1.40で作動を確認済み(図9.11は除く)
   - 各バージョンのインストール方法は添付したch00.ipynbの最初のセルを参照

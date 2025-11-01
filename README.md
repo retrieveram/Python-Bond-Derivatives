@@ -3,13 +3,13 @@
 ### QuantLibバージョン1.39へのコード修正 <sub>(Nov01,2025)</sub>
 
 - 本書はQuantLibバージョン1.34(以下ver1.34等)で作動するコードを記載
-- ver1.39での修正により、添付コードは次の各点において変更
+- ver1.39での修正により、添付コードは次の各点で変更
 
   - 債券オブジェクトのbondYieldメソッドは仕様変更があり、A.1節記載のmyABBRモジュール 126行目で**債券価格クラス**を戻す<b>関数cP(...)</b>を設定(cPはclean priceの略)
-    - 図4.2の13行目はこの関数により、97.0を<b>cP(97.0)</b>へ修正
+    - 図4.2の13行目はこの関数により、97.0を<b>cP(97.0)</b>へ修正 (図4.13も同じ)
   - 図4.18の**AssetSwap**クラスはRFR指数に対する計算の場合、変動レグスケジュールを設定する仕様に変更。
-    - これに対応するため、2行目で定義した空のfltSCH変数を次のように修正した
-      fltSCH = ql.Schedule(settleDT, matDT, pdFreqA, calJP, unADJ,unADJ, dtGENb, EoMf)
+    - これに対応するため、2行目で定義した空のfltSCH変数を次のように修正  
+      fltSCH = ql.Schedule(settleDT, matDT, pdFreqA, calJP, unADJ,unADJ, dtGENb, EoMf)  
       この設定は図4.2の9行目のbondSCDを多少修正したもの
   - 図9.11の5行目**underlyingSwap**メソッドは**underlying**に修正
     - もしver1.34で動かす場合、underlyingSwapへ戻すこと

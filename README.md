@@ -1,18 +1,19 @@
 ## Pythonで学ぶ債券・金利デリバティブ <sub>*(QuantLib-Python 入門)*</sub>
 
-### QuantLibバージョン1.39へのコード修正 <sub>(Oct26,2025)</sub>
+### QuantLibバージョン1.39へのコード修正 <sub>(Nov01,2025)</sub>
 
 - 本書はQuantLibバージョン1.34(以下ver1.34等)で作動するコードを記載
 - ver1.39での修正により、添付コードは次の各点において変更
 
-  - 債券オブジェクトのbondYieldメソッドは仕様変更があり、A.1節記載のmyABBRモジュール 131行目で**債券価格クラス**を戻す<b>関数cP(...)</b>を設定(cPはclean priceの略)
+  - 債券オブジェクトのbondYieldメソッドは仕様変更があり、A.1節記載のmyABBRモジュール 126行目で**債券価格クラス**を戻す<b>関数cP(...)</b>を設定(cPはclean priceの略)
     - 図4.2の13行目はこの関数により、97.0を<b>cP(97.0)</b>へ修正
-  - 図4.18の**AssetSwap**クラスはver1.39で目標値を算出できなくなったため、計算を停止中
-    - 計算が正しく行われるようになれば、復活予定 (ver1.34の計算は正しかったが、当面は手計算しよう)
-    - 本書において、手計算を再現出来ていないQuantLibクラスの使用は控えている
-  - myABBRモジュールの128,9行でver1.35以降で**newVSN=True**となるバージョン用フラッグを導入
-  - 図9.11の5行目**underlyingSwap**メソッドは**underlying**と修正されたため、5行目コードはnewVSNを使い、3項演算子で記述
-- 上記修正により、添付コードはver1.34～ver1.40で作動を確認済み
+  - 図4.18の**AssetSwap**クラスはRFR指数に対する計算の場合、変動レグスケジュールを設定する仕様に変更。
+    - これに対応するため、2行目で定義した空のfltSCH変数を次のように修正した
+      fltSCH = ql.Schedule(settleDT, matDT, pdFreqA, calJP, unADJ,unADJ, dtGENb, EoMf)
+      この設定は図4.2の9行目のbondSCDを多少修正したもの
+  - 図9.11の5行目**underlyingSwap**メソッドは**underlying**に修正
+    - もしver1.34で動かす場合、underlyingSwapへ戻すこと
+- 上記修正により、添付コードはver1.34～ver1.40で作動を確認済み(図9.11は除く)
   - 各バージョンのインストール方法は添付したch00.ipynbの最初のセルを参照
 - QuantLibの各バージョンの修正履歴は https://github.com/lballabio/QuantLib の右側中段のReleaseを参照
 

@@ -17,7 +17,7 @@
     - この仕様変更のため、図4.18 2行目で定義した空のfltSCH変数を次のように修正  
       fltSCH = ql.Schedule(settleDT, matDT, pdFreqA, calJP, unADJ,unADJ, dtGENb, EoMf)  
       (この引数は図4.2の9行目のbondSCDを多少修正したもの)
-    - 「空のfltSCH変数」の指定とはアセットスワップされる債券スケジュールのbondSCDが指定されることと同じ
+    - **空のfltSCH変数**の指定とはアセットスワップされる債券のスケジュールbondSCDが指定されることと同じ (つまり fltSCH=bondSCDに同じ)
   - 図9.11の5行目**underlyingSwap**メソッドを**underlying**へ修正 (もしver1.34で動かす場合、underlyingSwapへ戻さないとエラーとなる)
 - これらの修正により、上のコード群はver1.39, 1.40で作動を確認済み
   - 各バージョンのインストール方法は上の添付ファイルch00.ipynbの最初のセルを参照

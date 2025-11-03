@@ -57,4 +57,4 @@
   - C:\local\Anaconda3\python.exe や C:\local\Anaconda3\envs\base\python.exe 等
 
 <b>(ステップ2)</b> 
-- VS Codeで正しいカーネルを選択するには、VS Codeの右上にある<b>ガソリンスタンドアイコン</b>(隣に"Python 3.1x.x"等を表示)をクリックし、base(Python 3.xx.x) \... \Anaconda3\... と表示されているカーネルを選び、Restartさせる。(Anacondaのカーネルはbase...と表示されるはず)
+- VS Codeで正しいカーネルを選択するには、VS Codeの右上にある<b>ガソリンスタンド</b>のアイコン(隣に"Python 3.1x.x"等を表示)をクリックし、base(Python 3.xx.x) \... \Anaconda3\... と表示されているカーネルを選び、Restartさせる。(Anacondaのカーネルはbase...と表示されるはず)

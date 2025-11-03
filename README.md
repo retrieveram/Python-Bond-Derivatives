@@ -47,7 +47,7 @@
 - 対処法は次のステップ1, 2を実行すること。
 
 <p style="margin-left: 4em;">
-<b>(ステップ1)</b> まず、右のコマンドをセルで実行。import sys ; sys.executable
+\n<b>(ステップ1)</b> まず、右のコマンドをセルで実行。import sys ; sys.executable
 
 表示されるパスが
 C:\Users\<ユーザー名>\AppData\Local\Programs\Python\Python3x\python.exe

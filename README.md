@@ -47,6 +47,7 @@
 - 対処法は次のステップ1, 2を実行すること。
 
 <b>(ステップ1)</b> 
+
 <p style="margin-left: 4em;"> まず、右のコマンドをセルで実行。import sys ; sys.executable
 
 表示されるパスが

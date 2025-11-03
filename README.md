@@ -42,20 +42,18 @@
 
 ### (e) もしJupyter Notebookで添付ファイルが動かない場合
 
-- 「新しいディレクトリ + Anaconda + VS Code + Jupyter Notebook」の組み合わせの場合、QuantLibやその他ライブライ(numpy)等が動かないケースが多々発生する。原因はPythonを複数インストールしていて、新しいディレクトリごとにPython環境(カーネル)が切り替わるため。
+- 「新しいディレクトリ + Anaconda + VS Code + Jupyter Notebook」の組み合わせの場合、QuantLibやその他ライブライ(numpy)等が動かないケースが多々発生する。原因はPCの中にPythonを複数インストールしていて、新しいディレクトリごとにPython環境(カーネル)が切り替わるため。
 
 - 対処法は次のステップ1, 2を実行すること。
 
-<b>(ステップ1)</b>まず、次のコマンドをセルで実行し、
-import sys ; sys.executable
+<b>(ステップ1)</b> まず、右のコマンドをセルで実行。import sys ; sys.executable
 
 表示されるパスが
 C:\Users\<ユーザー名>\AppData\Local\Programs\Python\Python3x\python.exe
-のような場合、Anacondaではない別のPython環境(カーネル)にアクセスしている。
+のような場合、Anacondaではない別のカーネルにアクセス中。(このカーネルにはnumpy等もインストールされていない)
 
-本来 Anacondaのpythonは次のようにAnaconda3がパスの中に現れる。
-C:\local\Anaconda3\python.exe
-C:\local\Anaconda3\envs\base\python.exe
+本来 Anacondaのpythonは次のようにAnaconda3がパスの中に現れる。  
+C:\local\Anaconda3\python.exe や C:\local\Anaconda3\envs\base\python.exe 等
 
 <b>(ステップ2)</b> VS Codeで正しいカーネルを選択するには、VS Codeの右上にあるガソリンスタンドアイコン(隣に"Python 3.1x.x"等を表示)をクリックし、base(Python 3.xx.x)と表示されているカーネルを選び、Restartさせる。
 (Anacondaのカーネルはbase...と表示されるはず)

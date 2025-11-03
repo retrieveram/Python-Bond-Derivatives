@@ -46,6 +46,7 @@
 
 - 対処法は次のステップ1, 2を実行すること。
 
+<p style="margin-left: 4em;">
 <b>(ステップ1)</b> まず、右のコマンドをセルで実行。import sys ; sys.executable
 
 表示されるパスが
@@ -57,3 +58,4 @@ C:\local\Anaconda3\python.exe や C:\local\Anaconda3\envs\base\python.exe 等
 
 <b>(ステップ2)</b> VS Codeで正しいカーネルを選択するには、VS Codeの右上にあるガソリンスタンドアイコン(隣に"Python 3.1x.x"等を表示)をクリックし、base(Python 3.xx.x)と表示されているカーネルを選び、Restartさせる。
 (Anacondaのカーネルはbase...と表示されるはず)
+</p>

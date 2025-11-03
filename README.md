@@ -40,6 +40,7 @@
 | 7 | 図1.1の13行目 | 図1.1の3行目 |
 | 415 | 確率母関数 341 | 削除 |
 
+
 ### (e) もしJupyter Notebookで添付ファイルが動かない場合
 
 - 「新しいディレクトリ + Anaconda + VS Code + Jupyter Notebook」の組み合わせの場合、QuantLibやその他ライブライ(numpy)等が動かないケースが多々発生する。原因はPCの中にPythonを複数インストールしていて、新しいディレクトリごとにPython環境(カーネル)が切り替わるため。
@@ -48,7 +49,8 @@
 
 <b>(ステップ1)</b> 
 
-<div style="margin-left: 4em;"> まず、右のコマンドをセルで実行。import sys ; sys.executable
+<div style="margin-left: 4em;"> 
+まず、右のコマンドをセルで実行。import sys ; sys.executable
 
 表示されるパスが
 C:\Users\<ユーザー名>\AppData\Local\Programs\Python\Python3x\python.exe

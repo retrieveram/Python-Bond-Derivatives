@@ -50,8 +50,8 @@
 
 <b>(ステップ1)</b>   
 - まず、右のコマンドをセルで実行。import sys ; sys.executable
-- 表示されるパスが C:\Users\<ユーザー名>\AppData\Local\Programs\
-  Python\Python3x\python.exe のような場合、Anacondaではない別のカーネルにアクセス中。(このカーネルにはnumpy等もインストールされていない)
+- 表示されるパスが C:\Users\<ユーザー名>\AppData\Local\Programs\Python\...  
+  Python3x\python.exe のような場合、Anacondaではない別のカーネルにアクセス中。(このカーネルにはnumpy等もインストールされていない)
 
 - 本来 Anacondaのpythonは次のようにAnaconda3がパスの中に現れる。  
   - C:\local\Anaconda3\python.exe や C:\local\Anaconda3\envs\base\python.exe 等

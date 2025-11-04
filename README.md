@@ -3,24 +3,24 @@
 ### (a) ダウンロード手順
 - 上のファイル群はトップにある緑色の「<>Code」アイコンから「Download ZIP」の選択でダウンロード
 - 拡張子ipynbがJupyter Notebook用のファイルで、myABBR.pyとmyUtil.pyはipynbと同じディレクトリに置くこと
-- その他の拡張子pyのファイルは主にxlwings用
+- その他の拡張子pyのファイルは主にxlwings用で、xlsmのExcelファイルと同じディレクトリに
 
-### (b) QuantLibバージョン1.39へのコード修正 <sub>(Nov01,2025)</sub>
+### (b) QuantLibバージョン1.39へのコード修正 <sub>(Nov01, 2025)</sub>
 
 - 本書はQuantLibバージョン1.34(以下ver1.34等)で作動するコードを記載
-- ver1.39のリリースにより、添付コードは次の各点で変更済み
+- ver1.39のリリースにより、添付コードは次の各点で修正済み
 
-  - 債券オブジェクトのbondYieldメソッド、その他に仕様変更があり、A.1節記載のmyABBRモジュール 126行目で**債券価格クラス**を戻す<b>関数cP(...)</b>を設定(cPはclean priceの略)
+  - bondYieldメソッドとその関連メソッドに仕様変更があり、A.1節記載のmyABBRモジュール 126行目で**債券価格クラス**を戻す<b>関数cP(...)</b>を設定 (cPはclean priceの略)
     - 図4.2の13行目はこの関数により、97.0を<b>cP(97.0)</b>へ修正
-    - 図4.13のzSpreadも同じ理由で修正済み
+    - 図4.13のzSpreadメソッドも同じ理由で97.0をcP(97.0)へ修正
   - 図4.18の**AssetSwap**クラスはRFR指数に対する計算の場合、変動レグスケジュールを設定する仕様に変更。
     - この仕様変更のため、図4.18 2行目で定義した空のfltSCH変数を次のように修正  
       fltSCH = ql.Schedule(settleDT, matDT, pdFreqA, calJP, unADJ,unADJ, dtGENb, EoMf)  
       (この引数は図4.2の9行目のbondSCDを多少修正したもの)
-    - **空のfltSCH変数**の指定とはアセットスワップされる債券のスケジュールbondSCDが指定されることと同じ (つまり fltSCH=bondSCDに同じ)
-  - 図9.11の5行目**underlyingSwap**メソッドを**underlying**へ修正 (もしver1.34で動かす場合、underlyingSwapへ戻さないとエラーとなる)
+    - 本来 **空のfltSCH変数**の指定によってアセットスワップされる債券のスケジュールを参照させた (つまり fltSCH=bondSCDに同じ)
+  - 図9.11の5行目**underlyingSwap**メソッドは**underlying**へ変更 (もしver1.34で動かす場合、underlyingSwapへ戻さないとエラー)
 - これらの修正により、上のコード群はver1.39, 1.40で作動を確認済み
-  - 各バージョンのインストール方法は上の添付ファイルch00.ipynbの最初のセルを参照
+  - QuantLibの各バージョンのインストール方法は添付ファイルch00.ipynbの最初のセルを参照
 - QuantLibの各バージョンの修正履歴は https://github.com/lballabio/QuantLib の右側中段のReleaseを参照
 
 
@@ -51,10 +51,10 @@
 <b>(ステップ1)</b>   
 - まず、右のコマンドをセルで実行。import sys ; sys.executable
 - 表示されるパスが C:\Users\<ユーザー名>\AppData\Local\Programs\Python\...  
-  Python3x\python.exe のような場合、Anacondaではない別のカーネルにアクセス中。(このカーネルにはnumpy等もインストールされていない)
+  Python3x\python.exe のような場合、Anacondaではない別のカーネルにアクセスしている。(このカーネルにはnumpy等もインストールされていないはず)
 
 - 本来 Anacondaのpythonは次のようにAnaconda3がパスの中に現れる。  
   - C:\local\Anaconda3\python.exe や C:\local\Anaconda3\envs\base\python.exe 等
 
 <b>(ステップ2)</b> 
-- VS Codeで正しいカーネルを選択するには、VS Codeの右上にある<b>ガソリンスタンド</b>のアイコン(隣に"Python 3.1x.x"等を表示)をクリックし、base(Python 3.xx.x) \... \Anaconda3\... と表示されているカーネルを選び、Restartさせる。(Anacondaのカーネルはbase...と表示されるはず)
+- VS Codeで正しいカーネルを選択するには、VS Codeの右上にある<b>ガソリンスタンド</b>のアイコン(隣に"Python 3.1x.x"等を表示)をクリックし、base(Python 3.xx.x) \... \Anaconda3\... と表示されているカーネルを選び、Restartさせる。(Anacondaのカーネルはbase...と表示される)

@@ -26,8 +26,8 @@
 
 ### (c) その他 追記
 
-- 図1.1表題と1ページ最後の行で「CalendarクラスのコンストラクタJapan」と表現したが、正確には「Calendarクラスを継承したJapanクラスのデフォルトコンストラクタJapan」が正しい。イントロダクションのため、難解な表現を避けた。
-  - 同じ類の記述として、56ページでActual365Fixedを「DayCounterクラスのコンストラクタ」と呼んだ。
+- 図1.1表題と1ページ最後の行で「CalendarクラスのコンストラクタJapan」と表現したが、正確には「Calendarクラスを継承したJapanクラスのデフォルトコンストラクタJapan」が正しい。イントロダクションのため、難解な表現を避けた
+  - 同じ類の記述として、56ページでActual365Fixedを「DayCounterクラスのコンストラクタ」と呼んだ
 
 - 10章 図10.7 のプレミアムレグ計算値のズレ  : Sep 2, 2025 調査中
   - 現時点ではmailing listからの回答は無し
@@ -44,9 +44,9 @@
 
 ### (e) もしJupyter Notebookで添付ファイルが動かない場合
 
-- 「新しいディレクトリ + Anaconda + VS Code + Jupyter Notebook」の組み合わせの場合、QuantLibやその他ライブライ(numpy)等が動かないケースが多々発生する。原因はPCの中にPythonを複数インストールしていて、新しいディレクトリごとにPython環境(カーネル)が切り替わるため。
+- 「新しいディレクトリ + Anaconda + VS Code + Jupyter Notebook」の組み合わせの場合、QuantLibやその他ライブライ(numpy)等が動かないケースが多々発生する。原因はPCの中にPythonを複数インストールしていて、新しいディレクトリごとにPython環境(カーネル)が切り替わるため
 
-- 対処法は次のステップ1, 2を実行すること。
+- 対処法は次のステップ1, 2を実行すること
 
 <b>(ステップ1)</b>   
 - まず、右のコマンドをセルで実行。import sys ; sys.executable
@@ -57,4 +57,4 @@
   - C:\local\Anaconda3\python.exe や C:\local\Anaconda3\envs\base\python.exe 等
 
 <b>(ステップ2)</b> 
-- VS Codeで正しいカーネルを選択するには、VS Codeの右上にある<b>ガソリンスタンド</b>のアイコン(隣に"Python 3.1x.x"等を表示)をクリックし、base(Python 3.xx.x) \... \Anaconda3\... と表示されているカーネルを選び、Restartさせる。(Anacondaのカーネルはbase...と表示される)
+- VS Codeで正しいカーネルを選択するには、VS Codeの右上にある<b>ガソリンスタンド</b>のアイコン(隣に"Python 3.1x.x"等を表示)をクリックし、base(Python 3.xx.x) \... \Anaconda3\... と表示されているカーネルを選び、Restartさせる (Anacondaのカーネルはbase...と表示される)

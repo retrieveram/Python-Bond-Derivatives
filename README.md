@@ -5,7 +5,10 @@
 - 拡張子ipynbがJupyter Notebook用のファイルで、myABBR.pyとmyUtil.pyはipynbと同じディレクトリに置くこと
 - その他の拡張子pyのファイルは主にxlwings用で、xlsmのExcelファイルと同じディレクトリに
 
-### (b) QuantLibバージョン1.39へのコード修正 <sub>(Nov01, 2025)</sub>
+### (b) Qiitaへの投稿記事
+- 日本国債の特異体質とQuantLibによるJGBオブジェクト作成法 https://qiita.com/retrieveram/items/9ac277bbb4958e9e5d56
+
+### (c) QuantLibバージョン1.39へのコード修正 <sub>(Nov01, 2025)</sub>
 
 - 本書はQuantLibバージョン1.34(以下ver1.34等)で作動するコードを記載
 - ver1.39のリリースにより、添付コードは次の各点で修正済み
@@ -24,7 +27,7 @@
 - QuantLibの各バージョンの修正履歴は https://github.com/lballabio/QuantLib の右側中段のReleaseを参照
 
 
-### (c) その他 追記
+### (d) その他 追記
 
 - 図1.1表題と1ページ最後の行で「CalendarクラスのコンストラクタJapan」と表現したが、正確には「Calendarクラスを継承したJapanクラスのデフォルトコンストラクタJapan」が正しい。イントロダクションのため、難解な表現を避けた
   - 同じ類の記述として、56ページでActual365Fixedを「DayCounterクラスのコンストラクタ」と呼んだ
@@ -35,7 +38,7 @@
 
 - "はじめに"章の脚注3に記した**Python in Excel**で利用できるライブラリはMicrosoftが選択したものに限定され、QuantLibはまだ含まれていない
 
-### (d) 正誤表  
+### (e) 正誤表  
 
 | ページ | 誤 | 正 |
 |--------|----|----|
@@ -44,7 +47,7 @@
 
 \n
 
-### (e) もしJupyter Notebookで添付ファイルが動かない場合
+### (f) もしJupyter Notebookで添付ファイルが動かない場合
 
 - 新しいディレクトリで「Anaconda + VS Code + Jupyter Notebook」の組み合わせの場合、QuantLibやその他ライブライ(numpy)等が動かないケースが多々発生する。これはPCの中に複数のPythonをインストールした場合に起こる現象で、新しいディレクトリごとにPython環境(カーネル)が切り替わるため
 

@@ -7,7 +7,7 @@
 - 質問や要望はQiita記事の最後の「コメント」欄でお願いします
 
 ### (b) Qiitaへの投稿記事
-- "日本国債の特異体質とQuantLibによるJGBオブジェクト作成法"  https://qiita.com/retrieveram/items/9ac277bbb4958e9e5d56
+- 「日本国債の特異体質とQuantLibによるJGBオブジェクト作成法」  https://qiita.com/retrieveram/items/9ac277bbb4958e9e5d56
 
 ### (c) 正誤表  
 

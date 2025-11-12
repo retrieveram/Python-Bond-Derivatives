@@ -67,6 +67,7 @@ calWK   =  ql.WeekendsOnly()
 calNL   =  ql.NullCalendar()
 # DayCounter
 dcA365  =  ql.Actual365Fixed()
+dcA365n =  ql.Actual365Fixed(ql.Actual365Fixed.NoLeap)
 dcA360  =  ql.Actual360()       # includeLastDay=false
 dcA360t =  ql.Actual360(True)   # for CDS
 dc30    =  ql.Thirty360(ql.Thirty360.BondBasis)
@@ -82,11 +83,13 @@ Tp3     =  3
 freqA   =  ql.Annual                  # 1
 freqSA  =  ql.Semiannual              # 2
 freqQ   =  ql.Quarterly               # 4
+freqM   =  ql.Monthly                 # 12
 freqD   =  ql.Daily                   # 365
 # tenor (period version for freq)
 pdFreqA =  ql.Period(ql.Annual)       # 1Y
 pdFreqSA=  ql.Period(ql.Semiannual)   # 6M
 pdFreqQ =  ql.Period(ql.Quarterly)    # 3M
+pdFreqM =  ql.Period(ql.Monthly)      # 1M
 pdFreqD =  ql.Period(ql.Daily)        # 1D
 # convension
 mFLLW   =  ql.ModifiedFollowing

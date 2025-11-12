@@ -1,9 +1,10 @@
 ## Pythonで学ぶ債券・金利デリバティブ <sub>*(QuantLib-Python 入門)*</sub>
 
-### (a) ダウンロード方法
+### (a) ダウンロード方法、質問と要望
 - 上のファイル群はトップにある緑色の「<>Code」アイコンから「Download ZIP」の選択でダウンロード
 - 拡張子ipynbがJupyter Notebook用のファイルで、myABBR.pyとmyUtil.pyはipynbと同じディレクトリに置くこと
 - その他の拡張子pyのファイルは主にxlwings用で、xlsmのExcelファイルと同じディレクトリに
+- 質問や要望はQiita記事の最後の「コメント」経由でお願いします
 
 ### (b) Qiitaへの投稿記事
 - "日本国債の特異体質とQuantLibによるJGBオブジェクト作成法"  https://qiita.com/retrieveram/items/9ac277bbb4958e9e5d56

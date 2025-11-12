@@ -6,7 +6,7 @@
 - その他の拡張子pyのファイルは主にxlwings用で、xlsmのExcelファイルと同じディレクトリに
 
 ### (b) Qiitaへの投稿記事
-- 日本国債の特異体質とQuantLibによるJGBオブジェクト作成法 https://qiita.com/retrieveram/items/9ac277bbb4958e9e5d56
+- "日本国債の特異体質とQuantLibによるJGBオブジェクト作成法"  https://qiita.com/retrieveram/items/9ac277bbb4958e9e5d56
 
 ### (c) QuantLibバージョン1.39へのコード修正 <sub>(Nov01, 2025)</sub>
 

@@ -14,27 +14,31 @@ plt.rcParams.update({"font.family"   :"MS Gothic",
                      "font.size"     :9,
                      "figure.figsize":[4.5,2.5]})
 
-#---- C. numpy初期設定 5桁表示と配列短縮形 ----
+#---- C. numpy初期設定 5桁表示と配列短縮形, 切捨て ----
 np.set_printoptions(precision=5,suppress=True) 
 def nSetP():                     # %5桁表示設定
   np.set_printoptions(formatter={'float':'{:.5%}'.format}) 
 def nSetF():                     # float5桁表示設定
   np.set_printoptions(precision=5,suppress=True) 
-def nA(LIST):        return np.array(LIST)
+def nA(LIST):            return np.array(LIST)
+def rD(xx,digits=0): return np.floor(xx * 10**digits)/10**digits
+def rU(xx,digits=0): return np.ceil (xx * 10**digits)/10**digits
 
 #---- D. pandasスタイル書式用 辞書型変数 ----
-fmtSCF = {'amount':  '{:,.2f}', 'atmFWD':  '{:.6%}', 'coupon':  '{:.6%}',
-          'days':     '{:.0f}', 'DF':      '{:.8f}', 'nominal':'{:,.2f}',
-          'NPV':     '{:,.2f}', 'matYR':  '{:,.4f}', 'parRT':   '{:.6%}',
-          'rate':     '{:.6%}', 'shftRT':  '{:.6%}', 'spread':  '{:.3%}',
-          'zeroRT':   '{:.6%}'}
-fmtFUT = {'accruAMT':'{:,.4f}', 'amount': '{:,.4f}', 'BPV':     '{:.4f}',
-          'CF':       '{:.5f}', 'cleanPRC':'{:.4f}', 'coupon':  '{:.4%}',
-          'dirtyPRC': '{:.4f}', 'gBASIS':  '{:.4f}', 'yield':   '{:.4f}'}
+fmtSCF = {'amount':'{:,.2f}','atmFWD':'{:.6%}','coupon':'{:.6%}',
+          'days':'{:.0f}',   'DF':'{:.8f}',    'nominal':'{:,.2f}',
+          'NPV':'{:,.2f}',   'matYR':'{:,.4f}','parRT':'{:.6%}',
+          'rate':'{:.6%}',   'shftRT':'{:.6%}','spread':'{:.3%}',
+          'zeroRT':'{:.6%}'}
+fmtFUT = {'accruAMT':'{:,.4f}', 'amount':'{:,.4f}',  'BPV':'{:.4f}',
+          'CF':'{:.5f}',        'cleanPRC':'{:.4f}', 'coupon':'{:.4%}',
+          'dirtyPRC':'{:.4f}',  'gBASIS':'{:.4f}',   'yield':'{:.4f}' }
 
 #---- E. 日付関連メソッドの短縮形 ----
 # Days, Weeks, Months, Years
 DD = ql.Days ;  WW = ql.Weeks ;  MM = ql.Months ;  YY = ql.Years
+# euro日付
+def eDT(dd,mm,yyyy): return ql.Date(dd,mm,yyyy)
 # japan日付
 def jDT(yyyy,mm,dd): return ql.Date(dd,mm,yyyy)
 # datetimeクラスからQL Date

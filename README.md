@@ -7,8 +7,8 @@
 - 質問や要望はQiita記事の最後の「コメント」欄でお願いします
 
 ### (b) Qiitaへの投稿記事
-- 「第1回：日本国債の特異体質とQuantLibによるJGBオブジェクト作成法」(Nov12,2025)  https://qiita.com/retrieveram/items/9ac277bbb4958e9e5d56
-- 「第2回：JGBクラスの日本式複利メソッドの実装 (using Brentクラス)」(Nov20,2025) https://qiita.com/retrieveram/items/2956aec98842bbfae63b
+- [第1回：日本国債の特異体質とQuantLibによるJGBオブジェクト作成法](https://qiita.com/retrieveram/items/9ac277bbb4958e9e5d56) (Nov12,2025)
+- [第2回：JGBクラスの日本式複利メソッドの実装 (using Brentクラス)](https://qiita.com/retrieveram/items/2956aec98842bbfae63b) (Nov20,2025)
 
 ### (c) 正誤表  
 

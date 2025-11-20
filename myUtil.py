@@ -302,24 +302,36 @@ class normalCalculator:
         return matDF*self.SD(volRT,matYR)*(d1*norm.cdf(d1) + norm.pdf(d1))
 
 ##### JGB クラス #####    
-class JapanFixedRateBond(ql.FixedRateBond):
+# ・matDSで使うsettlementDate()はevaluationDateで変わるため、
+#   matDSは動的な計算が必要。
+# ・@propertyはメソッド(メンバ関数)を変数(プロパティ)のように
+#   見せるデコレータで、matDSメソッドは使用される毎に再計算する。
+# ・メンバ変数のself.cpnRTは初期値固定で十分。(再計算の必要なし)
+class JGB(ql.FixedRateBond):
     def __init__(self, settDS, faceAMT, bondSCD,cpn, dcBond, 
                  paymentConvention=ql.Following,
                  redemption=100.0, issueDate=ql.Date()      ):
       super().__init__(settDS, faceAMT, bondSCD, cpn, dcBond, 
                  paymentConvention, redemption, issueDate   )
+      self.cpnRT = ql.as_coupon(self.cashflows()[0]).rate()
+    # self.matDS = dcA365n.dayCount(self.settlementDate(), ...)
 
-    def SimplePrice(self, sYLD, cpnRT, matDS):
-        return 100*(365+cpnRT*matDS)/(365+sYLD*matDS)  # 100円当りの価格
+    @property
+    def matDS(self):
+      return dcA365n.dayCount(self.settlementDate(), self.maturityDate())
 
-    def SimpleYield(self, clnPR, cpnRT, matDS):
-        return  ( 100*(365+ cpnRT*matDS)/clnPR - 365 )/matDS  # 実数
+    def SimplePrice(self, sYLD):                # 100円当りの価格
+        return 100*(365+self.cpnRT*self.matDS)/(365+sYLD*self.matDS)
+
+    def SimpleYield(self, clnPR):                # 実数を戻す
+        return  ( 100*(365+ self.cpnRT*self.matDS)/clnPR - 365 )/self.matDS
     
-    def JapanCompoundYield(self, clnPR, cpnRT, matDS):
-      sYLD = self.SimpleYield(clnPR, cpnRT, matDS) 
+    def JapanCompoundYield(self, clnPR):
+      sYLD = self.SimpleYield(clnPR) 
       def prSLVR(yld):
-          CY = cpnRT / yld
-          DF = (1 + yld/freqSA)**(-matDS/365*freqSA)
-          tPR = 100*( CY + DF*(1-CY) )
-          return tPR - clnPR
-      return ql.Brent().solve(prSLVR, 1e-12, sYLD, -0.1, 1.0)
+          CY  = self.cpnRT / yld
+          DF  = (1 + yld/freqSA)**(-self.matDS*freqSA/365)
+          PRC = 100*( CY + DF*(1-CY) )
+          return PRC - clnPR
+                                   # accuracy guess xMin  xMax 
+      return ql.Brent().solve(prSLVR, 1e-6,   sYLD, -0.1, 1.0)

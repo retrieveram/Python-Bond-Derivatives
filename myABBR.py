@@ -21,8 +21,8 @@ def nSetP():                     # %5桁表示設定
 def nSetF():                     # float5桁表示設定
   np.set_printoptions(precision=5,suppress=True) 
 def nA(LIST):            return np.array(LIST)
-def rD(xx,digits=0): return np.floor(xx * 10**digits)/10**digits
-def rU(xx,digits=0): return np.ceil (xx * 10**digits)/10**digits
+def rD(xx,digits=0): return np.floor(xx * 10**digits)/10**digits #切捨て
+def rU(xx,digits=0): return np.ceil (xx * 10**digits)/10**digits #切上げ
 
 #---- D. pandasスタイル書式用 辞書型変数 ----
 fmtSCF = {'amount':'{:,.2f}','atmFWD':'{:.6%}','coupon':'{:.6%}',

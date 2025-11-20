@@ -329,9 +329,9 @@ class JGB(ql.FixedRateBond):
     def JapanCompoundYield(self, clnPR):
       sYLD = self.SimpleYield(clnPR) 
       def prSLVR(yld):
-          CY  = self.cpnRT / yld
+          Cy  = self.cpnRT / yld
           DF  = (1 + yld/freqSA)**(-self.matDS*freqSA/365)
-          PRC = 100*( CY + DF*(1-CY) )
+          PRC = 100*( Cy + (1-Cy)*DF )
           return PRC - clnPR
                                    # accuracy guess xMin  xMax 
       return ql.Brent().solve(prSLVR, 1e-6,   sYLD, -0.1, 1.0)

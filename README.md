@@ -4,7 +4,7 @@
 - 上のファイル群はトップにある緑色の「<>Code」アイコンから「Download ZIP」の選択でダウンロード
 - 拡張子ipynbがJupyter Notebook用のファイルで、myABBR.pyとmyUtil.pyはipynbと同じディレクトリに置くこと
 - その他の拡張子pyのファイルは主にxlwings用で、xlsmのExcelファイルと同じディレクトリに
-- myABBR.pyとmyUtil.pyは随時更新する。ファイル名に補足章とあるファイルが当初のもの
+- myABBR.pyとmyUtil.pyは随時更新する。ファイル名に"オリジナル"とあるファイルが補足章と同じもの
 - 質問や要望はQiita記事の最後の「コメント」欄へ
 
 ### (b) Qiitaへの投稿記事

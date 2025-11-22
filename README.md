@@ -4,7 +4,8 @@
 - 上のファイル群はトップにある緑色の「<>Code」アイコンから「Download ZIP」の選択でダウンロード
 - 拡張子ipynbがJupyter Notebook用のファイルで、myABBR.pyとmyUtil.pyはipynbと同じディレクトリに置くこと
 - その他の拡張子pyのファイルは主にxlwings用で、xlsmのExcelファイルと同じディレクトリに
-- 質問や要望はQiita記事の最後の「コメント」欄でお願いします
+- myABBR.pyとmyUtil.pyは随時更新する。ファイル名に補足章とあるファイルが当初のもの
+- 質問や要望はQiita記事の最後の「コメント」欄へ
 
 ### (b) Qiitaへの投稿記事
 - [第1回：日本国債の特異体質とQuantLibによるJGBオブジェクト作成法](https://qiita.com/retrieveram/items/9ac277bbb4958e9e5d56) (Nov12,2025)

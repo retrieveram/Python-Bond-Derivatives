@@ -151,7 +151,7 @@ def swapCashFlow(swapOBJ, curveOBJ, leg=1, dc=dcA365):
             'accruStart': cpn.accrualStartDate(),                # No ISO form
             'accruEnd':   cpn.accrualEndDate(),                  # No ISO form
             'payDate':    cpn.date(),                            # No ISO form
-            'days':       dc.dcBond(cpn.accrualStartDate(),cpn.accrualEndDate()),
+            'days':       dc.dayCount(cpn.accrualStartDate(),cpn.accrualEndDate()),
             'rate':       cpn.rate(),
             'spread':     cpn.spread(),
             'amount':     cpn.amount(),
@@ -171,7 +171,7 @@ def swapCashFlow(swapOBJ, curveOBJ, leg=1, dc=dcA365):
             'accruStart': cpn.accrualStartDate().ISO(),
             'accruEnd':   cpn.accrualEndDate().ISO(),
             'payDate':    cpn.date(),
-            'days':       dc.dcBond(cpn.accrualStartDate(),cpn.accrualEndDate()),
+            'days':       dc.dayCount(cpn.accrualStartDate(),cpn.accrualEndDate()),
             'rate':       cpn.rate(),
             'amount':     cpn.amount()
             } for cpn in map(ql.as_fixed_rate_coupon, swapOBJ.leg(0)))
@@ -329,9 +329,9 @@ class JGB(ql.FixedRateBond):
     def JapanCompoundYield(self, clnPR):
       sYLD = self.SimpleYield(clnPR) 
       def prSLVR(yld):
-          Cy  = self.cpnRT / yld
+          CY  = self.cpnRT / yld
           DF  = (1 + yld/freqSA)**(-self.matDS*freqSA/365)
-          PRC = 100*( Cy + (1-Cy)*DF )
+          PRC = 100*( CY + DF*(1-CY) )
           return PRC - clnPR
                                    # accuracy guess xMin  xMax 
       return ql.Brent().solve(prSLVR, 1e-6,   sYLD, -0.1, 1.0)

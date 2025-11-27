@@ -24,22 +24,22 @@
 ### (d) 追記
 
 - 図1.1表題と1ページ最後の行で「CalendarクラスのコンストラクタJapan」と表現したが、正確には「Calendarクラスを継承したJapanクラスのデフォルトコンストラクタJapan」が正しい。イントロダクションのため、難解な表現を避けた
-  - 同じ類の記述として、56ページでActual365Fixedを「DayCounterクラスのコンストラクタ」と呼んだ
+  - 同じ類の記述として、56ページで`Actual365Fixed`を「DayCounterクラスのコンストラクタ」と呼んだ
 
 - 10章 図10.7 のプレミアムレグ計算値のズレ  : Sep 2, 2025 調査中
   - 現時点ではmailing listからの回答は無し
   - C++のコードを確認するため、時間が必要
 
-- "はじめに"章の脚注3に記した**Python in Excel**で利用できるライブラリはMicrosoftが選択したものに限定され、QuantLibは含まれていない
+- "はじめに"章の脚注3に記した`Python in Excel`で利用できるライブラリはMicrosoftが選択したものに限定され、`QuantLib`は含まれていない
 
 ### (e) QuantLibバージョン1.39へのコード修正 <sub>(Nov01, 2025)</sub>
 
 - 本書はQuantLibバージョン1.34 (以下ver1.34等)でのコード
 - 添付コードは次の各点を修正し、ver1.39に対応
-  - bondYieldメソッド等の仕様変更への対応
+  - `bondYield`メソッド等の仕様変更への対応
     - A.1節記載のmyABBRモジュール 126行目で**債券価格クラス**を戻す<b>関数cP(...)</b>を設定 (cPはclean priceの略)
     - 図4.2の13行目はこの関数により、97.0を`cP(97.0)`へ修正
-    - 図4.13のzSpreadメソッドも同じ理由で97.0を`cP(97.0)`へ修正
+    - 図4.13の`zSpread`メソッドも同じ理由で97.0を`cP(97.0)`へ修正
   - 図4.18の**AssetSwap**クラスはRFR指数を使用する際の仕様に変更
     - 図4.18 2行目で定義した空の`fltSCH変数`を次のように修正  
       `fltSCH = ql.Schedule(settleDT, matDT, pdFreqA, calJP, unADJ,unADJ, dtGENb, EoMf)`  

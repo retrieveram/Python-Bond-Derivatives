@@ -234,7 +234,7 @@ def cdsCashFlow(cdsOBJ, hzCvOBJ, dsCvOBJ):
         'days':       cpn.amount()/(ntlAMT*cpn.rate()    /360),
         'YF':         cpn.amount()/(ntlAMT*cpn.rate()*365/360),
         'amount':     cpn.amount(),
-        } for cpn in map(ql.as_coupon, cdsOBJ.cpn()))
+        } for cpn in map(ql.as_coupon, cdsOBJ.coupons()))
     # 起算日の挿入
     dfEFF = pd.DataFrame([{'payDate': cdsOBJ.protectionStartDate(), 
                     'accEnd': cdsOBJ.protectionStartDate()}], columns=dfCDS.columns)

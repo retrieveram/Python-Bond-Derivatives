@@ -42,9 +42,9 @@
     - 図4.13のzSpreadメソッドも同じ理由で97.0をcP(97.0)へ修正
   - 図4.18の**AssetSwap**クラスはRFR指数を使用する際の仕様に変更
     - 図4.18 2行目で定義した空のfltSCH変数を次のように修正  
-      fltSCH = ql.Schedule(settleDT, matDT, pdFreqA, calJP, unADJ,unADJ, dtGENb, EoMf)  
+      `fltSCH = ql.Schedule(settleDT, matDT, pdFreqA, calJP, unADJ,unADJ, dtGENb, EoMf)`  
       (この引数は図4.2の9行目のbondSCDを多少修正したもの)
-    - 本来 **空のfltSCH変数**の指定によってアセットスワップされる債券のスケジュールを参照させた (つまり fltSCH=bondSCDに同じ)
+    - 本来 **空のfltSCH変数**の指定はアセットスワップされる債券のスケジュールを参照していた (fltSCH=bondSCDに同じ)
   - 図9.11の5行目**underlyingSwap**メソッドは**underlying**へ変更 (もしver1.34で動かす場合、underlyingSwapへ戻さないとエラー)
 - QuantLibの各バージョンのインストール方法は添付ファイルch00.ipynbの最初のセルを参照
 

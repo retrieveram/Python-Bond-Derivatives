@@ -1,8 +1,8 @@
 ## Pythonで学ぶ債券・金利デリバティブ <sub>*(QuantLib-Python 入門)*</sub>
 
 ### (a) ダウンロード方法、質問と要望
-- 上のファイル群はトップにある緑色の「<>Code」アイコンから「Download ZIP」の選択でダウンロード
-- 拡張子ipynbがJupyter Notebook用のファイルで、myABBR.pyとmyUtil.pyはipynbと同じディレクトリに置くこと
+- 上のファイル群はトップにある緑色の`<>Code`アイコンから`Download ZIP`の選択でダウンロード
+- 拡張子`ipynb`がJupyter Notebook用のファイルで、`myABBR.py`と`myUtil.py`はipynbと同じディレクトリに置くこと
 - その他の拡張子pyのファイルは主にxlwings用で、xlsmのExcelファイルと同じディレクトリに
 - myABBR.pyとmyUtil.pyは随時更新する。ファイル名に"オリジナル"とあるファイルが補足章と同じもの
 - 質問や要望はQiita記事の最後の「コメント」欄へ
@@ -38,15 +38,15 @@
 - 添付コードは次の各点を修正し、ver1.39に対応
   - bondYieldメソッド等の仕様変更への対応
     - A.1節記載のmyABBRモジュール 126行目で**債券価格クラス**を戻す<b>関数cP(...)</b>を設定 (cPはclean priceの略)
-    - 図4.2の13行目はこの関数により、97.0を<b>cP(97.0)</b>へ修正
-    - 図4.13のzSpreadメソッドも同じ理由で97.0をcP(97.0)へ修正
+    - 図4.2の13行目はこの関数により、97.0を`cP(97.0)`へ修正
+    - 図4.13のzSpreadメソッドも同じ理由で97.0を`cP(97.0)`へ修正
   - 図4.18の**AssetSwap**クラスはRFR指数を使用する際の仕様に変更
-    - 図4.18 2行目で定義した空のfltSCH変数を次のように修正  
+    - 図4.18 2行目で定義した空の`fltSCH変数`を次のように修正  
       `fltSCH = ql.Schedule(settleDT, matDT, pdFreqA, calJP, unADJ,unADJ, dtGENb, EoMf)`  
       (この引数は図4.2の9行目のbondSCDを多少修正したもの)
-    - 本来 **空のfltSCH変数**の指定はアセットスワップされる債券のスケジュールを参照していた (fltSCH=bondSCDに同じ)
-  - 図9.11の5行目**underlyingSwap**メソッドは**underlying**へ変更 (もしver1.34で動かす場合、underlyingSwapへ戻さないとエラー)
-- QuantLibの各バージョンのインストール方法は添付ファイルch00.ipynbの最初のセルを参照
+    - 本来 **空のfltSCH変数**の指定はアセットスワップされる債券のスケジュールを参照していた (`fltSCH=bondSCD`に同じ)
+  - 図9.11の5行目`underlyingSwap`メソッドは`underlying`へ変更 (もしver1.34で動かす場合、`underlyingSwap`へ戻さないとエラー)
+- QuantLibの各バージョンのインストール方法は添付ファイル`ch00.ipynb`の最初のセルを参照
 
 ### (f) もしJupyter Notebookで添付ファイルが動かない場合
 

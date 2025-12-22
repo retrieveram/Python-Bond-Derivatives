@@ -108,9 +108,10 @@ def makeTiborCurve(crvDATA):
   # 2. HelperとTiborカーブオブジェクト
     cHelper, tbParRT = [], []
     for knd, tnr, rt in crvDATA:
-       if knd == 'depo': cHelper.append(ql.DepositRateHelper(sqHDL(rt/100),tbrIX)) 
-       if knd == 'swap': cHelper.append(ql.SwapRateHelper(   sqHDL(rt/100),
-                                    pD(tnr), calJP, freqSA, mFLLW, dcA365, tbrIX))
+       if knd == 'depo': cHelper.append(ql.DepositRateHelper(sqHDL(rt/100),     tbrIX)) 
+       if knd == 'fra' : cHelper.append(ql.FraRateHelper (sqHDL(rt/100),pD(tnr),tbrIX)) 
+       if knd == 'swap': cHelper.append(ql.SwapRateHelper(sqHDL(rt/100),
+                                         pD(tnr), calJP, freqSA, mFLLW, dcA365, tbrIX))
        tbParRT.append(rt/100)                            # パーレート用リスト
     tbCrvOBJ = ql.PiecewiseLogLinearDiscount(Tp2, calJP, cHelper, dcA365)
     tbCrvHDL.linkTo(tbCrvOBJ) ; tbCrvOBJ.enableExtrapolation()

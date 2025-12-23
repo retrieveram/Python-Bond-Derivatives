@@ -2,14 +2,15 @@
 
 ### (a) ダウンロード方法、質問と要望
 - 上のファイル群はトップにある緑色の`<>Code`アイコンから`Download ZIP`の選択でダウンロード
-- 拡張子`ipynb`がJupyter Notebook用のファイルで、`myABBR.py`と`myUtil.py`はipynbと同じディレクトリに置くこと
-- その他の拡張子pyのファイルは主にxlwings用で、xlsmのExcelファイルと同じディレクトリに
-- myABBR.pyとmyUtil.pyは随時更新する。ファイル名に"オリジナル"とあるファイルが補足章と同じもの
+- 拡張子`ipynb`がJupyter Notebook用のファイルで、`myABBR.py`と`myUtil.py`はipynbと同じディレクトリに置く
+- その他の拡張子`py`のファイルは主にxlwings用で、Excelファイルと同じディレクトリに置く
+- myABBR.pyとmyUtil.pyは随時更新予定。ファイル名に"オリジナル"とあるファイルが補足章と同じもの
 - 質問や要望はQiita記事の最後の「コメント」欄へ
 
 ### (b) Qiitaへの投稿記事
 - [第1回：日本国債の特異体質とQuantLibによるJGBオブジェクト作成法](https://qiita.com/retrieveram/items/9ac277bbb4958e9e5d56) (Nov12,2025)
 - [第2回：JGBクラスの日本式複利メソッドの実装 (using Brentクラス)](https://qiita.com/retrieveram/items/2956aec98842bbfae63b) (Nov20,2025)
+- [第3回：シリアルFRAを持つTiborカーブの構築](https://qiita.com/retrieveram/items/67245bcd3e9ef5353c43)  (Dec22,2025)
 
 ### (c) 正誤表  
 
@@ -32,23 +33,7 @@
 
 - "はじめに"章の脚注3に記した`Python in Excel`で利用できるライブラリはMicrosoftが選択したものに限定され、`QuantLib`は含まれていない
 
-### (e) QuantLibバージョン1.39へのコード修正 <sub>(Nov01, 2025)</sub>
-
-- 本書はQuantLibバージョン1.34 (以下ver1.34等)でのコード
-- 添付コードは次の各点を修正し、ver1.39に対応
-  - `bondYield`メソッド等の仕様変更への対応
-    - A.1節記載のmyABBRモジュール 126行目で**債券価格クラス**を戻す<b>関数cP(...)</b>を設定 (cPはclean priceの略)
-    - 図4.2の13行目はこの関数により、97.0を`cP(97.0)`へ修正
-    - 図4.13の`zSpread`メソッドも同じ理由で97.0を`cP(97.0)`へ修正
-  - 図4.18の**AssetSwap**クラスはRFR指数を使用する際の仕様に変更
-    - 図4.18 2行目で定義した空の`fltSCH変数`を次のように修正  
-      `fltSCH = ql.Schedule(settleDT, matDT, pdFreqA, calJP, unADJ,unADJ, dtGENb, EoMf)`  
-      (この引数は図4.2の9行目のbondSCDを多少修正したもの)
-    - 本来 **空のfltSCH変数**の指定はアセットスワップされる債券のスケジュールを参照していた (`fltSCH=bondSCD`に同じ)
-  - 図9.11の5行目`underlyingSwap`メソッドは`underlying`へ変更 (もしver1.34で動かす場合、`underlyingSwap`へ戻さないとエラー)
-- QuantLibの各バージョンのインストール方法は添付ファイル`ch00.ipynb`の最初のセルを参照
-
-### (f) もしJupyter Notebookで添付ファイルが動かない場合
+### (e) もしJupyter Notebookで添付ファイルが動かない場合
 
 - 新しいディレクトリで「Anaconda + VS Code + Jupyter Notebook」の組み合わせの場合、QuantLibやその他ライブライ(numpy)等が動かないケースが多々発生する。これはPCの中に複数のPythonをインストールした場合に起こる現象で、新しいディレクトリごとにPython環境(カーネル)が切り替わるため
 

@@ -33,6 +33,8 @@
 
 - "はじめに"章の脚注3に記した`Python in Excel`で利用できるライブラリはMicrosoftが選択したものに限定され、`QuantLib`は含まれていない
 
+- QuantLibの仕様変更への対応は該当するコードに注記した
+
 ### (e) もしJupyter Notebookで添付ファイルが動かない場合
 
 - 新しいディレクトリで「Anaconda + VS Code + Jupyter Notebook」の組み合わせの場合、QuantLibやその他ライブライ(numpy)等が動かないケースが多々発生する。これはPCの中に複数のPythonをインストールした場合に起こる現象で、新しいディレクトリごとにPython環境(カーネル)が切り替わるため

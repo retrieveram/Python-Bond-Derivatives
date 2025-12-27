@@ -16,10 +16,11 @@ plt.rcParams.update({"font.family"   :"MS Gothic",
 
 #---- C. numpy初期設定 5桁表示と配列短縮形, 切捨て ----
 np.set_printoptions(precision=5,suppress=True) 
-def nSetP():                     # %5桁表示設定
-  np.set_printoptions(formatter={'float':'{:.5%}'.format}) 
-def nSetF():                     # float5桁表示設定
-  np.set_printoptions(precision=5,suppress=True) 
+def nSetP(dgt=5):                     # %5桁表示設定
+  fmt = '{:.' + str(dgt) + '%}'
+  np.set_printoptions(formatter={'float':fmt.format}) 
+def nSetF(dgt=5):                     # float5桁表示設定
+  np.set_printoptions(precision=dgt,suppress=True) 
 def nA(LIST):            return np.array(LIST)
 def rD(xx,digits=0): return np.floor(xx * 10**digits)/10**digits #切捨て
 def rU(xx,digits=0): return np.ceil (xx * 10**digits)/10**digits #切上げ

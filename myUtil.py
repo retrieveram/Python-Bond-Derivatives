@@ -108,10 +108,9 @@ def makeTiborCurve(crvDATA):
   # 2. HelperとTiborカーブオブジェクト
     cHelper, tbParRT = [], []
     for knd, tnr, rt in crvDATA:
-       if knd == 'depo': cHelper.append(ql.DepositRateHelper(sqHDL(rt/100),     tbrIX)) 
-       if knd == 'fra' : cHelper.append(ql.FraRateHelper (sqHDL(rt/100),pD(tnr),tbrIX)) 
-       if knd == 'swap': cHelper.append(ql.SwapRateHelper(sqHDL(rt/100),
-                                         pD(tnr), calJP, freqSA, mFLLW, dcA365, tbrIX))
+       if knd == 'depo': cHelper.append(ql.DepositRateHelper(sqHDL(rt/100),tbrIX)) 
+       if knd == 'swap': cHelper.append(ql.SwapRateHelper(   sqHDL(rt/100),
+                                    pD(tnr), calJP, freqSA, mFLLW, dcA365, tbrIX))
        tbParRT.append(rt/100)                            # パーレート用リスト
     tbCrvOBJ = ql.PiecewiseLogLinearDiscount(Tp2, calJP, cHelper, dcA365)
     tbCrvHDL.linkTo(tbCrvOBJ) ; tbCrvOBJ.enableExtrapolation()
@@ -264,6 +263,51 @@ def cdsCashFlow(cdsOBJ, hzCvOBJ, dsCvOBJ):
     dfCDS.accEnd  =  dfCDS.accEnd.map(lambda x:x.ISO())
     return dfCDS
 
+##### 債券 #####    
+def makeUsTsyBond(effDT, matDT, cpnRT, faceAMT=100.0, settleDS=Tp1, scdFLG=False):
+    # 発行,満期日 処理
+    effDT, matDT = jDT(*effDT), jDT(*matDT)  
+    # スケジュール, 債券オブジェクト
+    bondSCD = ql.Schedule(effDT,matDT,pdFreqSA,calUSg,unADJ,unADJ,dtGENb,EoMt)
+    bondOBJ = ql.FixedRateBond(settleDS, faceAMT, bondSCD, [cpnRT/100], dcAAb)
+    if scdFLG: return bondOBJ, bondSCD
+    else     : return bondOBJ
+
+##### JGB クラス #####    
+# ・matDSで使うsettlementDate()はevaluationDateで変わるため、
+#   matDSは動的な計算が必要。
+# ・@propertyはメソッド(メンバ関数)を変数(プロパティ)のように
+#   見せるデコレータで、matDSメソッドは使用される毎に再計算する。
+# ・メンバ変数のself.cpnRTは初期値固定で十分。(再計算の必要なし)
+class JGB(ql.FixedRateBond):
+    def __init__(self, settDS, faceAMT, bondSCD,cpn, dcBond, 
+                 paymentConvention=ql.Following,
+                 redemption=100.0, issueDate=ql.Date()      ):
+      super().__init__(settDS, faceAMT, bondSCD, cpn, dcBond, 
+                 paymentConvention, redemption, issueDate   )
+      self.cpnRT = ql.as_coupon(self.cashflows()[0]).rate()
+    # self.matDS = dcA365n.dayCount(self.settlementDate(), ...)
+
+    @property
+    def matDS(self):
+      return dcA365n.dayCount(self.settlementDate(), self.maturityDate())
+
+    def SimplePrice(self, sYLD):                # 100円当りの価格
+        return 100*(365+self.cpnRT*self.matDS)/(365+sYLD*self.matDS)
+
+    def SimpleYield(self, clnPR):                # 実数を戻す
+        return  ( 100*(365+ self.cpnRT*self.matDS)/clnPR - 365 )/self.matDS
+    
+    def JapanCompoundYield(self, clnPR):
+      sYLD = self.SimpleYield(clnPR) 
+      def prSLVR(yld):
+          CY  = self.cpnRT / yld
+          DF  = (1 + yld/freqSA)**(-self.matDS*freqSA/365)
+          PRC = 100*( CY + DF*(1-CY) )
+          return PRC - clnPR
+                                   # accuracy guess xMin  xMax 
+      return ql.Brent().solve(prSLVR, 1e-6,   sYLD, -0.1, 1.0)
+    
 ##### ノーマルモデル クラス #####
 class normalCalculator:
     ''' Bachelier normal model class
@@ -301,38 +345,3 @@ class normalCalculator:
                             else self.rfOBJ_.discount(matYR*360/365)        
         d1 = self.dd(futRT, volRT, matYR) 
         return matDF*self.SD(volRT,matYR)*(d1*norm.cdf(d1) + norm.pdf(d1))
-
-##### JGB クラス #####    
-# ・matDSで使うsettlementDate()はevaluationDateで変わるため、
-#   matDSは動的な計算が必要。
-# ・@propertyはメソッド(メンバ関数)を変数(プロパティ)のように
-#   見せるデコレータで、matDSメソッドは使用される毎に再計算する。
-# ・メンバ変数のself.cpnRTは初期値固定で十分。(再計算の必要なし)
-class JGB(ql.FixedRateBond):
-    def __init__(self, settDS, faceAMT, bondSCD,cpn, dcBond, 
-                 paymentConvention=ql.Following,
-                 redemption=100.0, issueDate=ql.Date()      ):
-      super().__init__(settDS, faceAMT, bondSCD, cpn, dcBond, 
-                 paymentConvention, redemption, issueDate   )
-      self.cpnRT = ql.as_coupon(self.cashflows()[0]).rate()
-    # self.matDS = dcA365n.dayCount(self.settlementDate(), ...)
-
-    @property
-    def matDS(self):
-      return dcA365n.dayCount(self.settlementDate(), self.maturityDate())
-
-    def SimplePrice(self, sYLD):                # 100円当りの価格
-        return 100*(365+self.cpnRT*self.matDS)/(365+sYLD*self.matDS)
-
-    def SimpleYield(self, clnPR):                # 実数を戻す
-        return  ( 100*(365+ self.cpnRT*self.matDS)/clnPR - 365 )/self.matDS
-    
-    def JapanCompoundYield(self, clnPR):
-      sYLD = self.SimpleYield(clnPR) 
-      def prSLVR(yld):
-          CY  = self.cpnRT / yld
-          DF  = (1 + yld/freqSA)**(-self.matDS*freqSA/365)
-          PRC = 100*( CY + DF*(1-CY) )
-          return PRC - clnPR
-                                   # accuracy guess xMin  xMax 
-      return ql.Brent().solve(prSLVR, 1e-6,   sYLD, -0.1, 1.0)

@@ -48,6 +48,10 @@ def dDT(dateTIME):   return ql.Date().from_date(dateTIME)
 def iDT(isoDT):      return ql.Date(isoDT, '%Y-%m-%d')
 # 曜日
 def dayOfWeek(Date): return Date.to_date().strftime('%a')
+# 月初と月末の日付、月の日数
+def bDTmm(d) :       return ql.Date(1, d.month(), d.year())
+def eDTmm(d) :       return d.endOfMonth(d)
+def dsMM(d)  :       return ql.Date.endOfMonth(d).dayOfMonth()
 # SettingクラスevaluationDate設定
 def setEvDT(evaluationDT):  
   ql.Settings.instance().evaluationDate = evaluationDT
@@ -127,10 +131,13 @@ cpn100  = 0.01
 cpn500  = 0.05
 bP      = ql.Protection.Buyer  # 0
 sP      = ql.Protection.Seller # 1
-# others
+# bond, CPI, クリーン価格等
 parPR   = 100.0
 parAMT  = 100.0
+cpiLNR  = ql.CPI.Linear
+cpiFLT  = ql.CPI.Flat
+lag3M   = ql.Period('3M')
+gwOLY   = False
 
-# クリーン価格、ダーティー価格
 def cP(prc): return ql.BondPrice(prc, ql.BondPrice.Clean)
 def dP(prc): return ql.BondPrice(prc, ql.BondPrice.Dirty)

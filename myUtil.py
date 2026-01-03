@@ -222,6 +222,44 @@ def bondCashFlow(bondOBJ, ir='', yts='', past=0):
     dfBND.payDate  =  dfBND.payDate.map(lambda x: x.ISO())  # ISOフォーマットへ
     return dfBND
 
+# 物価連動債 (past=0は過去キャッシュフローの非表示)
+def cpiBondCashFlow(bondOBJ, ir='', yts='', past=0):    
+    '''1:(ir='',yts='')=No DF      2:(ir=irOBJ, yts='')=ir DF
+       3:(ir='', yts=ytOBJ)=yt DF  
+       4:( , ,past=0)=futureCF      5:( , ,past=1)=past+futureCF    '''
+    dfCPN = pd.DataFrame({
+        'payDate':    cpn.date(),          # no ISO
+        'accruStart': cpn.accrualStartDate().ISO(),
+        'accruEnd':   cpn.accrualEndDate().ISO(),
+        'cpi':        cpn.indexFixing(),
+        'coupon':     cpn.rate(),        
+        'amount':     cpn.amount(),
+        } for cpn in map(ql.as_cpi_coupon, bondOBJ.cashflows()) if cpn is not None )
+    # 起算日, 元本
+    dfEFF = pd.DataFrame([{'payDate': bondOBJ.startDate()}], columns=dfCPN.columns)
+    dfPRN = pd.DataFrame({'payDate': cf.date(), 'amount':cf.amount()} for cf,cpn 
+            in zip(bondOBJ.cashflows(),map(ql.as_cpi_coupon, bondOBJ.cashflows())) 
+                                                                if cpn is None )
+    dfBND = pd.concat([dfEFF, dfCPN, dfPRN], ignore_index=True) 
+    # ディスカウントファクター列作成
+    settleDT = bondOBJ.settlementDate()
+    psDF = [1.0       for dt in dfBND.payDate if dt <= settleDT]     #past DF
+    # future DF
+    if ir != '' and yts == '' :                                     # irtOBJ
+      fuDF = [ir.discountFactor(settleDT, dt)
+                      for dt in dfBND.payDate if settleDT < dt ] 
+      dfBND = pd.concat([dfBND, pd.DataFrame(psDF+fuDF, columns=['DF']) ], axis=1)
+    elif yts != '' :                                                  # ytsOBJ
+      fuDF = [yts.discount(dt)
+                      for dt in dfBND.payDate if settleDT < dt ] 
+      dfBND = pd.concat([dfBND, pd.DataFrame(psDF+fuDF, columns=['DF']) ], axis=1)
+    # 将来キャッシュフローの抽出
+    if past == 0: 
+      dfBND = dfBND[dfBND.payDate >= settleDT]
+      dfBND = dfBND.reset_index(drop=True)              #インデックス番号リセット
+    dfBND.payDate  =  dfBND.payDate.map(lambda x: x.ISO())  # ISOフォーマットへ
+    return dfBND
+
 # CDS
 def cdsCashFlow(cdsOBJ, hzCvOBJ, dsCvOBJ):
     '''cdsCashFlow(cdsOBJ, hzCvOBJ, dsCvOBJ)-> DataFrame)'''    
@@ -263,13 +301,11 @@ def cdsCashFlow(cdsOBJ, hzCvOBJ, dsCvOBJ):
     dfCDS.accEnd  =  dfCDS.accEnd.map(lambda x:x.ISO())
     return dfCDS
 
-##### 債券 #####    
+##### 債券 ##### 
+# テキスト143ページとは異なり、effDT,matDT はql.Date型、cpnRTは実数に変更
 def makeUsTsyBond(effDT, matDT, cpnRT, faceAMT=100.0, settleDS=Tp1, scdFLG=False):
-    # 発行,満期日 処理
-    effDT, matDT = jDT(*effDT), jDT(*matDT)  
-    # スケジュール, 債券オブジェクト
     bondSCD = ql.Schedule(effDT,matDT,pdFreqSA,calUSg,unADJ,unADJ,dtGENb,EoMt)
-    bondOBJ = ql.FixedRateBond(settleDS, faceAMT, bondSCD, [cpnRT/100], dcAAb)
+    bondOBJ = ql.FixedRateBond(settleDS, faceAMT, bondSCD, [cpnRT], dcAAb)
     if scdFLG: return bondOBJ, bondSCD
     else     : return bondOBJ
 

@@ -303,16 +303,24 @@ def cdsCashFlow(cdsOBJ, hzCvOBJ, dsCvOBJ):
 
 ##### 債券 ##### 
 # テキスト143ページとは異なり、effDT,matDT はql.Date型、cpnRTは実数に変更
-def makeUsTsyBond(effDT, matDT, cpnRT, faceAMT=100.0, settleDS=Tp1, scdFLG=False):
-    bondSCD = ql.Schedule(effDT,matDT,pdFreqSA,calUSg,unADJ,unADJ,dtGENb,EoMt)
-    bondOBJ = ql.FixedRateBond(settleDS, faceAMT, bondSCD, [cpnRT], dcAAb)
-    if scdFLG: return bondOBJ, bondSCD
-    else     : return bondOBJ
+def makeJGB(effDT, matDT, cpnRT, faceAMT=100.0, nOBJ=1):
+    jgbSCD = ql.Schedule(effDT,matDT,pdFreqSA,calJP,unADJ,unADJ,dtGENb,EoMf)
+    jgbOBJ = JGB(Tp1, faceAMT, jgbSCD, [cpnRT], dcA365n)
+    jgbOBa = JGB(Tp1, faceAMT, jgbSCD, [cpnRT], dcA365 )
+    if   nOBJ==3: return jgbOBJ, jgbOBa, jgbSCD
+    elif nOBJ==2: return jgbOBJ, jgbOBa
+    else        : return jgbOBJ
+
+def makeUsTsy(effDT, matDT, cpnRT, faceAMT=100.0, nOBJ=1):
+    tsySCD = ql.Schedule(effDT,matDT,pdFreqSA,calUSg,unADJ,unADJ,dtGENb,EoMt)
+    tsyOBJ = ql.FixedRateBond(Tp1, faceAMT, tsySCD, [cpnRT], dcAAb)
+    if nOBJ==2: return tsyOBJ, tsySCD
+    else      : return tsyOBJ
 
 ##### JGB クラス #####    
 # ・matDSで使うsettlementDate()はevaluationDateで変わるため、
 #   matDSは動的な計算が必要。
-# ・@propertyはメソッド(メンバ関数)を変数(プロパティ)のように
+# ・@propertyはメソッド(メンバ関数)をメンバ変数のように
 #   見せるデコレータで、matDSメソッドは使用される毎に再計算する。
 # ・メンバ変数のself.cpnRTは初期値固定で十分。(再計算の必要なし)
 class JGB(ql.FixedRateBond):

@@ -132,12 +132,17 @@ cpn500  = 0.05
 bP      = ql.Protection.Buyer  # 0
 sP      = ql.Protection.Seller # 1
 # bond, CPI, クリーン価格等
-parPR   = 100.0
-parAMT  = 100.0
-cpiLNR  = ql.CPI.Linear
-cpiFLT  = ql.CPI.Flat
-lag3M   = ql.Period('3M')
-gwOLY   = False
+parPR    = 100.0
+parAMT   = 100.0
+cpiLNR   = ql.CPI.Linear
+cpiFLT   = ql.CPI.Flat
+jp9DS    = 9
+lag3M    = ql.Period('3M')
+lag0M    = ql.Period('0M')
+gwOLY    = False
+reviseF  = False
+jpRegion = ql.CustomRegion("Japan", "JP")
+usRegion = ql.CustomRegion("USA",   "US")
 
 def cP(prc): return ql.BondPrice(prc, ql.BondPrice.Clean)
 def dP(prc): return ql.BondPrice(prc, ql.BondPrice.Dirty)

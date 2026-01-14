@@ -13,6 +13,7 @@
 - [第2回：JGBクラスの日本式複利メソッドの実装 (using Brentクラス)](https://qiita.com/retrieveram/items/2956aec98842bbfae63b) (Nov20,2025)
 - [第3回：シリアルFRAを持つTiborカーブの構築](https://qiita.com/retrieveram/items/67245bcd3e9ef5353c43)  (Dec22,2025)
 - [第4回：Hagan-West流 の Tiborカーブ構築](https://qiita.com/retrieveram/items/f0f8550120d66ada8463)  (Dec27,2025)
+- [第5回：Break-even Inflation(BEI)の定義と計算例](https://qiita.com/retrieveram/items/9051f5f59a5aad576da9)  (Jan14,2026)
 
 ### (c) 正誤表  
 

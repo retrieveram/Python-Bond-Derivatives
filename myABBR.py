@@ -42,6 +42,8 @@ DD = ql.Days ;  WW = ql.Weeks ;  MM = ql.Months ;  YY = ql.Years
 def eDT(dd,mm,yyyy): return ql.Date(dd,mm,yyyy)
 # japan日付
 def jDT(yyyy,mm,dd): return ql.Date(dd,mm,yyyy)
+# us日付
+def uDT(mm,dd,yyyy): return ql.Date(dd,mm,yyyy)
 # datetimeクラスからQL Date
 def dDT(dateTIME):   return ql.Date().from_date(dateTIME)
 # iso日付
@@ -52,9 +54,10 @@ def dayOfWeek(Date): return Date.to_date().strftime('%a')
 def bDTmm(d) :       return ql.Date(1, d.month(), d.year())
 def eDTmm(d) :       return d.endOfMonth(d)
 def dsMM(d)  :       return ql.Date.endOfMonth(d).dayOfMonth()
-# SettingクラスevaluationDate設定
+# SettingクラスevaluationDate設定、取得
 def setEvDT(evaluationDT):  
   ql.Settings.instance().evaluationDate = evaluationDT
+def getEvDT():       return ql.Settings.instance().evaluationDate
 
 # Period 3種類の短縮形 (2番目はタプルが引数)
 @singledispatch

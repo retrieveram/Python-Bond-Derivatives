@@ -129,7 +129,7 @@ def makeEuriborCurve(crvDATA):
        if knd == 'swap': cHelper.append(ql.SwapRateHelper(   sqHDL(rt/100),
                                        pD(tnr), calEU, freqA, mFLLW, dc30, ebrIX))
        ebParRT.append(rt/100)                            # パーレート用リスト
-    ebCrvOBJ = ql.PiecewiseLogLinearDiscount(Tp2, calEU, cHelper, dcA360)
+    ebCrvOBJ = ql.PiecewiseLogLinearDiscount(Tp2, calEU, cHelper, dc30)
     ebCrvHDL.linkTo(ebCrvOBJ) ; ebCrvOBJ.enableExtrapolation()
     return [ebrIX, ebCrvOBJ, ebCrvHDL, ebParRT]  # 4つのオブジェクトを戻す    
   
@@ -301,18 +301,20 @@ def cdsCashFlow(cdsOBJ, hzCvOBJ, dsCvOBJ):
     dfCDS.accEnd  =  dfCDS.accEnd.map(lambda x:x.ISO())
     return dfCDS
 
-##### 債券 ##### 
+##### 債券オブジェクト 作成関数 ##### 
 # テキスト143ページとは異なり、effDT,matDT はql.Date型、cpnRTは実数に変更
+# 関数から戻されるオブジェクトは nOBJ=1,2,3 で指定
 def makeJGB(effDT, matDT, cpnRT, faceAMT=100.0, nOBJ=1):
-    jgbSCD = ql.Schedule(effDT,matDT,pdFreqSA,calJP,unADJ,unADJ,dtGENb,EoMf)
+    jgbSCD = ql.Schedule(effDT,matDT,pdFreqSA,calNL,unADJ,unADJ,dtGENb,EoMf)
     jgbOBJ = JGB(Tp1, faceAMT, jgbSCD, [cpnRT], dcA365n)
-    jgbOBa = JGB(Tp1, faceAMT, jgbSCD, [cpnRT], dcA365 )
-    if   nOBJ==3: return jgbOBJ, jgbOBa, jgbSCD
-    elif nOBJ==2: return jgbOBJ, jgbOBa
+    jgbSCa = ql.Schedule(effDT,matDT,pdFreqSA,calJP,unADJ,unADJ,dtGENb,EoMf)    
+    jgbOBa = JGB(Tp1, faceAMT, jgbSCa, [cpnRT], dcA365 )
+    if   nOBJ==3: return jgbOBJ, jgbSCD, jgbOBa
+    elif nOBJ==2: return jgbOBJ, jgbSCD
     else        : return jgbOBJ
 
 def makeUsTsy(effDT, matDT, cpnRT, faceAMT=100.0, nOBJ=1):
-    tsySCD = ql.Schedule(effDT,matDT,pdFreqSA,calUSg,unADJ,unADJ,dtGENb,EoMt)
+    tsySCD = ql.Schedule(effDT,matDT,pdFreqSA,calNL,unADJ,unADJ,dtGENb,EoMt)
     tsyOBJ = ql.FixedRateBond(Tp1, faceAMT, tsySCD, [cpnRT], dcAAb)
     if nOBJ==2: return tsyOBJ, tsySCD
     else      : return tsyOBJ

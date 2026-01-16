@@ -307,8 +307,7 @@ def cdsCashFlow(cdsOBJ, hzCvOBJ, dsCvOBJ):
 def makeJGB(effDT, matDT, cpnRT, faceAMT=100.0, nOBJ=1):
     jgbSCD = ql.Schedule(effDT,matDT,pdFreqSA,calNL,unADJ,unADJ,dtGENb,EoMf)
     jgbOBJ = JGB(Tp1, faceAMT, jgbSCD, [cpnRT], dcA365n)
-    jgbSCa = ql.Schedule(effDT,matDT,pdFreqSA,calJP,unADJ,unADJ,dtGENb,EoMf)    
-    jgbOBa = JGB(Tp1, faceAMT, jgbSCa, [cpnRT], dcA365 )
+    jgbOBa = JGB(Tp1, faceAMT, jgbSCD, [cpnRT], dcA365 )
     if   nOBJ==3: return jgbOBJ, jgbSCD, jgbOBa
     elif nOBJ==2: return jgbOBJ, jgbSCD
     else        : return jgbOBJ

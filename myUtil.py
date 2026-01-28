@@ -24,7 +24,7 @@ def bVolTSH(tradeDT, vol, cal=calWK, dc=dcA365):
                     ql.BlackConstantVol(tradeDT, cal, vol, dc))
 
 ##### 各種カーブオブジェクト作成 #####
-# SOFRカーブ
+# SOFRカーブ 
 def makeSofrCurve(crvDATA):
     '''makeSofrCurve(crvDATA)->[sofrIX,sfCrvOBJ,sfCrvHDL,sfParRT]'''      
   # 1.指標金利オブジェクトと初期値設定
@@ -32,10 +32,12 @@ def makeSofrCurve(crvDATA):
     sofrIX = ql.Sofr(sfCrvHDL)
   # 2. HelperとSOFRカーブオブジェクト
     cHelper, sfParRT = [], []
-    for knd, tnr, rt in crvDATA:
+    for knd, tnr, rt in crvDATA:  # tnr=(0:month,1:year,2:freq) for futures
         if knd == 'depo':
             if ql.Period(tnr).length() == 1:
                 cHelper.append(ql.DepositRateHelper(sqHDL(rt/100),sofrIX)) 
+        if knd == 'fut': cHelper.append(
+            ql.SofrFutureRateHelper(sqHDL(rt),tnr[0],tnr[1],tnr[2]))
         if knd == 'swap': cHelper.append(
             ql.OISRateHelper(Tp2, ql.Period(tnr),sqHDL(rt/100),sofrIX))
         sfParRT.append(rt/100)                             # パーレート用リスト
@@ -109,6 +111,7 @@ def makeTiborCurve(crvDATA):
     cHelper, tbParRT = [], []
     for knd, tnr, rt in crvDATA:
        if knd == 'depo': cHelper.append(ql.DepositRateHelper(sqHDL(rt/100),tbrIX)) 
+       if knd == 'fra' : cHelper.append(ql.FraRateHelper (sqHDL(rt/100),pD(tnr),tbrIX)) 
        if knd == 'swap': cHelper.append(ql.SwapRateHelper(   sqHDL(rt/100),
                                     pD(tnr), calJP, freqSA, mFLLW, dcA365, tbrIX))
        tbParRT.append(rt/100)                            # パーレート用リスト

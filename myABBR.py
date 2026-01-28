@@ -21,7 +21,7 @@ def nSetP(dgt=5):                     # %5桁表示設定
   np.set_printoptions(formatter={'float':fmt.format}) 
 def nSetF(dgt=5):                     # float5桁表示設定
   np.set_printoptions(precision=dgt,suppress=True) 
-def nA(LIST):            return np.array(LIST)
+def nA(LIST):        return np.array(LIST)
 def rD(xx,digits=0): return np.floor(xx * 10**digits)/10**digits #切捨て
 def rU(xx,digits=0): return np.ceil (xx * 10**digits)/10**digits #切上げ
 

@@ -92,12 +92,24 @@ Tp1     =  1
 Tp2     =  2
 Tp3     =  3
 # freqency
+frqA   =  ql.Annual                  # 1
+frqSA  =  ql.Semiannual              # 2
+frqQ   =  ql.Quarterly               # 4
+frqM   =  ql.Monthly                 # 12
+frqD   =  ql.Daily                   # 365
+# OLD-freqency
 freqA   =  ql.Annual                  # 1
 freqSA  =  ql.Semiannual              # 2
 freqQ   =  ql.Quarterly               # 4
 freqM   =  ql.Monthly                 # 12
 freqD   =  ql.Daily                   # 365
 # tenor (period version for freq)
+pDfrqA =  ql.Period(ql.Annual)       # 1Y
+pDfrqSA=  ql.Period(ql.Semiannual)   # 6M
+pDfrqQ =  ql.Period(ql.Quarterly)    # 3M
+pDfrqM =  ql.Period(ql.Monthly)      # 1M
+pDfrqD =  ql.Period(ql.Daily)        # 1D
+# OLD-tenor
 pdFreqA =  ql.Period(ql.Annual)       # 1Y
 pdFreqSA=  ql.Period(ql.Semiannual)   # 6M
 pdFreqQ =  ql.Period(ql.Quarterly)    # 3M
@@ -117,9 +129,17 @@ dtGEN15 =  ql.DateGeneration.CDS2015
 EoMf    =  False
 EoMt    =  True
 # compound
+CMP =  ql.Compounded
+CNT =  ql.Continuous
+SPL =  ql.Simple
+# OLD-compound
 cmpdCMP =  ql.Compounded
 cmpdCNT =  ql.Continuous
 cmpdSPL =  ql.Simple
+# pay/recieve, put/call
+swPAY   = ql.Swap.Payer
+swRCV   = ql.Swap.Receiver
+
 # currency
 jpyFX   =  ql.JPYCurrency()
 usdFX   =  ql.USDCurrency()

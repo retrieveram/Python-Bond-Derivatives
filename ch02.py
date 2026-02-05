@@ -1,4 +1,4 @@
-import xlwings as xw ; from myABBR import * ; import myUtil as mu
+import xlwings as xw ; from myABBR import * ; import myUTIL as mu
 
 @xw.func 
 @xw.arg('dateINF', ndim=1)

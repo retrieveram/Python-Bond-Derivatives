@@ -1,4 +1,4 @@
-from myABBR import * ; import myUtil as mu
+from myABBR import * ; import myUTIL as mu
 import xlwings as xw
 @xw.func
 

@@ -1,5 +1,5 @@
 # 債券評価用xlwings
-import xlwings as xw ; from myABBR import * ; import myUtil as mu
+import xlwings as xw ; from myABBR import * ; import myUTIL as mu
 @xw.func
 @xw.arg('trdDATA', ndim=1)
 @xw.arg('bondDTL', ndim=1)

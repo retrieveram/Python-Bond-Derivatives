@@ -14,7 +14,7 @@ def ffTSH(settleDT, rate, dc=dcA365, cmpd=2, freq=1):
      cmpd=2:Continuous, 1:Compounded freq=1:Annual 2:Semiannual''' 
   ffCrvOBJ = ql.FlatForward(settleDT, rate, dc, cmpd, freq)
   ffCrvOBJ.enableExtrapolation()
-  return (ffCrvOBJ, ql.YieldTermStructureHandle(ffCrvOBJ))
+  return ffCrvOBJ, ql.YieldTermStructureHandle(ffCrvOBJ)
 
 # ブラックコンスタントボラTSハンドル
 def bVolTSH(tradeDT, vol, cal=calWK, dc=dcA365):   
@@ -43,14 +43,14 @@ def makeSofrCurve(crvDATA):
         sfParRT.append(rt/100)                             # パーレート用リスト
     sfCrvOBJ = ql.PiecewiseLogLinearDiscount(Tp0, calUSs, cHelper, dcA360)
     sfCrvHDL.linkTo(sfCrvOBJ) ; sfCrvOBJ.enableExtrapolation()
-    return [sofrIX, sfCrvOBJ, sfCrvHDL, sfParRT]      # 4つのオブジェクトを戻す
+    return sofrIX, sfCrvOBJ, sfCrvHDL, sfParRT
   
 # TONAカーブ
 def makeTonaCurve(crvDATA):
     '''makeTonaCurve(crvDATA)->[tonaIX,tnCrvOBJ,tnCrvHDL,tnParRT]'''
   # 1.指標金利オブジェクト
     tnCrvHDL = ql.RelinkableYieldTermStructureHandle()  
-    tonaIX = ql.OvernightIndex('TONA', Tp0,   jpyFX, calJP, dcA365, tnCrvHDL)
+    tonaIX = ql.OvernightIndex('TONA', Tp0,  jpyFX, calJP, dcA365, tnCrvHDL)
   # 2. カーブヘルパー
     cHelper, tnParRT = [], []
     for knd, tnr, rt in crvDATA:
@@ -62,7 +62,7 @@ def makeTonaCurve(crvDATA):
   # カーブオブジェクト
     tnCrvOBJ = ql.PiecewiseLogLinearDiscount(Tp0, calJP, cHelper, dcA365)
     tnCrvHDL.linkTo(tnCrvOBJ) ; tnCrvOBJ.enableExtrapolation()
-    return [tonaIX, tnCrvOBJ, tnCrvHDL, tnParRT]        # 4つのオブジェクトを戻す    
+    return tonaIX, tnCrvOBJ, tnCrvHDL, tnParRT
   
 # ESTRカーブ
 def makeEstrCurve(crvDATA):
@@ -81,13 +81,13 @@ def makeEstrCurve(crvDATA):
   # カーブオブジェクト      
   esCrvOBJ = ql.PiecewiseLogLinearDiscount(Tp0, calEU, cHelper, dcA360)
   esCrvHDL.linkTo(esCrvOBJ) ; esCrvOBJ.enableExtrapolation()
-  return [esIX, esCrvOBJ, esCrvHDL, esParRT]      # 4つのオブジェクトを戻す
+  return esIX, esCrvOBJ, esCrvHDL, esParRT
 
 def makeTonaCurve(crvDATA):
     '''makeTonaCurve(crvDATA)->[tonaIX,tnCrvOBJ,tnCrvHDL,tnParRT]'''
   # 1.指標金利オブジェクト
     tnCrvHDL = ql.RelinkableYieldTermStructureHandle()  
-    tonaIX = ql.OvernightIndex('TONA', Tp0,   jpyFX, calJP, dcA365, tnCrvHDL)
+    tonaIX = ql.OvernightIndex('TONA', Tp0, jpyFX, calJP, dcA365, tnCrvHDL)
   # 2. カーブヘルパー
     cHelper, tnParRT = [], []
     for knd, tnr, rt in crvDATA:
@@ -99,7 +99,7 @@ def makeTonaCurve(crvDATA):
   # カーブオブジェクト
     tnCrvOBJ = ql.PiecewiseLogLinearDiscount(Tp0, calJP, cHelper, dcA365)
     tnCrvHDL.linkTo(tnCrvOBJ) ; tnCrvOBJ.enableExtrapolation()
-    return [tonaIX, tnCrvOBJ, tnCrvHDL, tnParRT]        # 4つのオブジェクトを戻す    
+    return tonaIX, tnCrvOBJ, tnCrvHDL, tnParRT
   
 # TIBORカーブ
 def makeTiborCurve(crvDATA):
@@ -110,14 +110,14 @@ def makeTiborCurve(crvDATA):
   # 2. HelperとTiborカーブオブジェクト
     cHelper, tbParRT = [], []
     for knd, tnr, rt in crvDATA:
-       if knd == 'depo': cHelper.append(ql.DepositRateHelper(sqHDL(rt/100),tbrIX)) 
+       if knd == 'depo': cHelper.append(ql.DepositRateHelper(sqHDL(rt/100),     tbrIX)) 
        if knd == 'fra' : cHelper.append(ql.FraRateHelper (sqHDL(rt/100),pD(tnr),tbrIX)) 
-       if knd == 'swap': cHelper.append(ql.SwapRateHelper(   sqHDL(rt/100),
-                                    pD(tnr), calJP, freqSA, mFLLW, dcA365, tbrIX))
+       if knd == 'swap': cHelper.append(ql.SwapRateHelper(sqHDL(rt/100),pD(tnr), 
+                                                   calJP, frqSA, mFLLW, dcA365, tbrIX))
        tbParRT.append(rt/100)                            # パーレート用リスト
     tbCrvOBJ = ql.PiecewiseLogLinearDiscount(Tp2, calJP, cHelper, dcA365)
     tbCrvHDL.linkTo(tbCrvOBJ) ; tbCrvOBJ.enableExtrapolation()
-    return [tbrIX, tbCrvOBJ, tbCrvHDL, tbParRT]  # 4つのオブジェクトを戻す
+    return tbrIX, tbCrvOBJ, tbCrvHDL, tbParRT
 
 # Euriborカーブ
 def makeEuriborCurve(crvDATA):
@@ -130,11 +130,11 @@ def makeEuriborCurve(crvDATA):
     for knd, tnr, rt in crvDATA:
        if knd == 'depo': cHelper.append(ql.DepositRateHelper(sqHDL(rt/100),ebrIX)) 
        if knd == 'swap': cHelper.append(ql.SwapRateHelper(   sqHDL(rt/100),
-                                       pD(tnr), calEU, freqA, mFLLW, dc30, ebrIX))
+                                       pD(tnr), calEU, frqA, mFLLW, dc30, ebrIX))
        ebParRT.append(rt/100)                            # パーレート用リスト
     ebCrvOBJ = ql.PiecewiseLogLinearDiscount(Tp2, calEU, cHelper, dc30)
     ebCrvHDL.linkTo(ebCrvOBJ) ; ebCrvOBJ.enableExtrapolation()
-    return [ebrIX, ebCrvOBJ, ebCrvHDL, ebParRT]  # 4つのオブジェクトを戻す    
+    return ebrIX, ebCrvOBJ, ebCrvHDL, ebParRT
   
 # アニュイティ計算
 def calcAnnuity(annSCD, crvOBJ, dc=dcA365): 
@@ -161,7 +161,7 @@ def swapCashFlow(swapOBJ, curveOBJ, leg=1, dc=dcA365):
             } for cpn in map(ql.as_floating_rate_coupon, swapOBJ.leg(1)))
         # マルチカーブのフォワード                                  1000は便宜上の数字
         fwdRT = [curveOBJ.forwardRate(                         
-                        dfSWP.accruStart[id],dfSWP.accruEnd[id], dcA365, cmpdSPL).rate()
+                        dfSWP.accruStart[id],dfSWP.accruEnd[id], dcA365, SPL).rate()
                       if settleDT < dfSWP.accruStart[id] else 1000 for id in dfSWP.index ] 
         dfSWP = pd.concat([dfSWP, pd.DataFrame(fwdRT, columns=['fwdRT']) ], axis=1)
         dfSWP.rate= dfSWP.rate.where(dfSWP.fwdRT>999, dfSWP.fwdRT)
@@ -350,7 +350,7 @@ class JGB(ql.FixedRateBond):
       sYLD = self.SimpleYield(clnPR) 
       def prSLVR(yld):
           CY  = self.cpnRT / yld
-          DF  = (1 + yld/freqSA)**(-self.matDS*freqSA/365)
+          DF  = (1 + yld/frqSA)**(-self.matDS*frqSA/365)
           PRC = 100*( CY + DF*(1-CY) )
           return PRC - clnPR
                                    # accuracy guess xMin  xMax 

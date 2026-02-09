@@ -102,19 +102,23 @@ def makeTonaCurve(crvDATA):
     return tonaIX, tnCrvOBJ, tnCrvHDL, tnParRT
   
 # TIBORカーブ
-def makeTiborCurve(crvDATA):
-    '''makeTiborCurve(crvDATA)->[tbrIX,tbCrvOBJ,tbCrvHDL,tbParRT]'''
+def makeTiborCurve(crvDATA, dCRV=None):
+    '''makeTiborCurve(crvDATA,dCRV)->[tbrIX,tbCrvOBJ,tbCrvHDL,tbParRT]
+       dCRV:discount curve'''
   # 1.指標金利オブジェクト
     tbCrvHDL = ql.RelinkableYieldTermStructureHandle() 
     tbrIX    = ql.Tibor(pdFreqSA, tbCrvHDL)
   # 2. HelperとTiborカーブオブジェクト
     cHelper, tbParRT = [], []
     for knd, tnr, rt in crvDATA:
-       if knd == 'depo': cHelper.append(ql.DepositRateHelper(sqHDL(rt/100),     tbrIX)) 
-       if knd == 'fra' : cHelper.append(ql.FraRateHelper (sqHDL(rt/100),pD(tnr),tbrIX)) 
-       if knd == 'swap': cHelper.append(ql.SwapRateHelper(sqHDL(rt/100),pD(tnr), 
-                                                   calJP, frqSA, mFLLW, dcA365, tbrIX))
-       tbParRT.append(rt/100)                            # パーレート用リスト
+      if knd == 'depo': cHelper.append(ql.DepositRateHelper(sqHDL(rt/100),     tbrIX)) 
+      if knd == 'fra' : cHelper.append(ql.FraRateHelper (sqHDL(rt/100),pD(tnr),tbrIX))
+      if knd == 'swap': 
+        if dCRV: cHelper.append(ql.SwapRateHelper(sqHDL(rt/100), pD(tnr), calJP,
+                        frqSA, mFLLW, dcA365, tbrIX, sqHDL(0), pD('0d'), dCRV))
+        else:    cHelper.append(ql.SwapRateHelper(sqHDL(rt/100), pD(tnr), calJP, 
+                        frqSA, mFLLW, dcA365, tbrIX,))
+      tbParRT.append(rt/100)                            # パーレート用リスト
     tbCrvOBJ = ql.PiecewiseLogLinearDiscount(Tp2, calJP, cHelper, dcA365)
     tbCrvHDL.linkTo(tbCrvOBJ) ; tbCrvOBJ.enableExtrapolation()
     return tbrIX, tbCrvOBJ, tbCrvHDL, tbParRT
@@ -150,33 +154,33 @@ def swapCashFlow(swapOBJ, curveOBJ, leg=1, dc=dcA365):
     settleDT = curveOBJ.referenceDate() 
     if leg == 1:  # 変動ﾚｸﾞ leg(1)
         dfSWP = pd.DataFrame({
-            'fixingDate': cpn.fixingDate().ISO(),
-            'accruStart': cpn.accrualStartDate(),                # No ISO form
-            'accruEnd':   cpn.accrualEndDate(),                  # No ISO form
-            'payDate':    cpn.date(),                            # No ISO form
-            'days':       dc.dayCount(cpn.accrualStartDate(),cpn.accrualEndDate()),
-            'rate':       cpn.rate(),
-            'spread':     cpn.spread(),
-            'amount':     cpn.amount(),
+            'fixDate': cpn.fixingDate().ISO(),
+            'accStart':cpn.accrualStartDate(),                # No ISO form
+            'accEnd':  cpn.accrualEndDate(),                  # No ISO form
+            'payDate': cpn.date(),                            # No ISO form
+            'days':    dc.dayCount(cpn.accrualStartDate(),cpn.accrualEndDate()),
+            'rate':    cpn.rate(),
+            'spread':  cpn.spread(),
+            'amount':  cpn.amount(),
             } for cpn in map(ql.as_floating_rate_coupon, swapOBJ.leg(1)))
         # マルチカーブのフォワード                                  1000は便宜上の数字
         fwdRT = [curveOBJ.forwardRate(                         
-                        dfSWP.accruStart[id],dfSWP.accruEnd[id], dcA365, SPL).rate()
-                      if settleDT < dfSWP.accruStart[id] else 1000 for id in dfSWP.index ] 
+                        dfSWP.accStart[id],dfSWP.accEnd[id], dcA365, SPL).rate()
+                      if settleDT < dfSWP.accStart[id] else 1000 for id in dfSWP.index ] 
         dfSWP = pd.concat([dfSWP, pd.DataFrame(fwdRT, columns=['fwdRT']) ], axis=1)
-        dfSWP.rate= dfSWP.rate.where(dfSWP.fwdRT>999, dfSWP.fwdRT)
-        dfSWP = dfSWP.drop('fwdRT', axis=1)
-        dfSWP.accruStart = dfSWP.accruStart.map(lambda x: x.ISO())
-        dfSWP.accruEnd = dfSWP.accruEnd.map(lambda x: x.ISO())
+        dfSWP.rate     = dfSWP.rate.where(dfSWP.fwdRT>999, dfSWP.fwdRT)
+        dfSWP          = dfSWP.drop('fwdRT', axis=1)
+        dfSWP.accStart = dfSWP.accStart.map(lambda x: x.ISO())
+        dfSWP.accEnd   = dfSWP.accEnd.map(lambda x: x.ISO())
     else:          # 固定ﾚｸﾞ leg(0)
         dfSWP = pd.DataFrame({
-            'nominal':    cpn.nominal(),
-            'accruStart': cpn.accrualStartDate().ISO(),
-            'accruEnd':   cpn.accrualEndDate().ISO(),
-            'payDate':    cpn.date(),
-            'days':       dc.dayCount(cpn.accrualStartDate(),cpn.accrualEndDate()),
-            'rate':       cpn.rate(),
-            'amount':     cpn.amount()
+            'nominal':  cpn.nominal(),
+            'accStart': cpn.accrualStartDate().ISO(),
+            'accEnd':   cpn.accrualEndDate().ISO(),
+            'payDate':  cpn.date(),
+            'days':     dc.dayCount(cpn.accrualStartDate(),cpn.accrualEndDate()),
+            'rate':     cpn.rate(),
+            'amount':   cpn.amount()
             } for cpn in map(ql.as_fixed_rate_coupon, swapOBJ.leg(0)))
     # 起算日の挿入
     dfEFF = pd.DataFrame([{'payDate': swapOBJ.startDate()}], columns=dfSWP.columns)
@@ -194,11 +198,11 @@ def bondCashFlow(bondOBJ, ir='', yts='', past=0):
        3:(ir='', yts=ytOBJ)=yt DF  
        4:( , ,past=0)=futureCF      5:( , ,past=1)=past+futureCF    '''
     dfCPN = pd.DataFrame({
-        'payDate':    cpn.date(),          # no ISO
-        'coupon':     cpn.rate(),
-        'accruStart': cpn.accrualStartDate().ISO(),
-        'accruEnd':   cpn.accrualEndDate().ISO(),
-        'amount':     cpn.amount(),
+        'payDate':  cpn.date(),          # no ISO
+        'coupon':   cpn.rate(),
+        'accStart': cpn.accrualStartDate().ISO(),
+        'accEnd':   cpn.accrualEndDate().ISO(),
+        'amount':   cpn.amount(),
         } for cpn in map(ql.as_coupon, bondOBJ.cashflows()) if cpn is not None )
     # 起算日, 元本
     dfEFF = pd.DataFrame([{'payDate': bondOBJ.startDate()}], columns=dfCPN.columns)
@@ -231,12 +235,12 @@ def cpiBondCashFlow(bondOBJ, ir='', yts='', past=0):
        3:(ir='', yts=ytOBJ)=yt DF  
        4:( , ,past=0)=futureCF      5:( , ,past=1)=past+futureCF    '''
     dfCPN = pd.DataFrame({
-        'payDate':    cpn.date(),          # no ISO
-        'accruStart': cpn.accrualStartDate().ISO(),
-        'accruEnd':   cpn.accrualEndDate().ISO(),
-        'cpi':        cpn.indexFixing(),
-        'coupon':     cpn.rate(),        
-        'amount':     cpn.amount(),
+        'payDate':  cpn.date(),          # no ISO
+        'accStart': cpn.accrualStartDate().ISO(),
+        'accEnd':   cpn.accrualEndDate().ISO(),
+        'cpi':      cpn.indexFixing(),
+        'coupon':   cpn.rate(),        
+        'amount':   cpn.amount(),
         } for cpn in map(ql.as_cpi_coupon, bondOBJ.cashflows()) if cpn is not None )
     # 起算日, 元本
     dfEFF = pd.DataFrame([{'payDate': bondOBJ.startDate()}], columns=dfCPN.columns)

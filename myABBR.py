@@ -27,10 +27,11 @@ def rU(xx,digits=0): return np.ceil (xx * 10**digits)/10**digits #切上げ
 
 #---- D. pandasスタイル書式用 辞書型変数 ----
 fmtSCF = {'amount':'{:,.2f}','atmFWD':'{:.6%}','coupon':'{:.6%}',
-          'days':'{:.0f}',   'DF':'{:.8f}',    'nominal':'{:,.2f}',
+          'days':'{:.0f}',   'DF':'{:.8f}',    'fwdRT':'{:.6%}',
+          'nominal':'{:,.2f}',
           'NPV':'{:,.2f}',   'matYR':'{:,.4f}','parRT':'{:.6%}',
           'rate':'{:.6%}',   'shftRT':'{:.6%}','spread':'{:.3%}',
-          'zeroRT':'{:.6%}'}
+          'zeroRT':'{:.6%}', }
 fmtFUT = {'accruAMT':'{:,.4f}', 'amount':'{:,.4f}',  'BPV':'{:.4f}',
           'CF':'{:.5f}',        'cleanPRC':'{:.4f}', 'coupon':'{:.4%}',
           'dirtyPRC':'{:.4f}',  'gBASIS':'{:.4f}',   'yield':'{:.4f}' }

@@ -15,7 +15,8 @@
 - [第4回：Hagan-West流 の Tiborカーブ構築](https://qiita.com/retrieveram/items/f0f8550120d66ada8463)  (Dec27,2025)
 - [第5回：Break-even Inflation(BEI)の定義と計算例](https://qiita.com/retrieveram/items/9051f5f59a5aad576da9)  (Jan14,2026)
 - [第6回：物価連動国債のキャッシュフローと名目利回り (その1)](https://qiita.com/retrieveram/items/2f7cee84999e1fffd7b4)  (Jan21,2026)
-- [第7回：物価連動国債のキャッシュフローと名目利回り (その2)](https://qiita.com/retrieveram/items/1a5765b1cc00dcedd5b8)  (Jan27,2026) 
+- [第7回：物価連動国債のキャッシュフローと名目利回り (その2)](https://qiita.com/retrieveram/items/1a5765b1cc00dcedd5b8)  (Jan27,2026)
+- [第8回：ツーカーブでのTibor3ヶ月スワップのコードと解釈](https://qiita.com/retrieveram/items/7bc208ba3e359801cfef)  (Feb23,2026) 
 
 ### (c) 正誤表  
 

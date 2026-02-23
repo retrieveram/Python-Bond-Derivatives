@@ -25,16 +25,22 @@ def nA(LIST):        return np.array(LIST)
 def rD(xx,digits=0): return np.floor(xx * 10**digits)/10**digits #切捨て
 def rU(xx,digits=0): return np.ceil (xx * 10**digits)/10**digits #切上げ
 
-#---- D. pandasスタイル書式用 辞書型変数 ----
-fmtSCF = {'amount':'{:,.2f}','atmFWD':'{:.6%}','coupon':'{:.6%}',
-          'days':'{:.0f}',   'DF':'{:.8f}',    'fwdRT':'{:.6%}',
-          'nominal':'{:,.2f}',
-          'NPV':'{:,.2f}',   'matYR':'{:,.4f}','parRT':'{:.6%}',
-          'rate':'{:.6%}',   'shftRT':'{:.6%}','spread':'{:.3%}',
-          'zeroRT':'{:.6%}', }
-fmtFUT = {'accruAMT':'{:,.4f}', 'amount':'{:,.4f}',  'BPV':'{:.4f}',
-          'CF':'{:.5f}',        'cleanPRC':'{:.4f}', 'coupon':'{:.4%}',
-          'dirtyPRC':'{:.4f}',  'gBASIS':'{:.4f}',   'yield':'{:.4f}' }
+#---- D. pandas スタイル書式用変数, 日付列変換, df表示 ----
+fmS = {'amount':'{:,.2f}',   'atmFWD':'{:.6%}',   'coupon':'{:.6%}',
+       'days':'{:.0f}',      'DF':'{:.8f}',       'fwdRT':'{:.6%}',
+       'nominal':'{:,.2f}',  'NPV':'{:,.2f}',     'matYR':'{:,.4f}',
+       'parRT':'{:.6%}',     'rate':'{:.6%}',     'rfrDF':'{:.8f}',             
+       'shftRT':'{:.6%}',    'spread':'{:.3%}',   'zeroRT':'{:.6%}', }
+fmB = {'accruAMT':'{:,.4f}', 'amount':'{:,.4f}',  'BPV':'{:.4f}',
+       'CF':'{:.5f}',        'cleanPRC':'{:.4f}', 'coupon':'{:.4%}',
+       'dirtyPRC':'{:.4f}',  'gBASIS':'{:.4f}',   'yield':'{:.4f}' }
+fmtSCF, fmtFUT = fmS, fmB                              # for old vari.
+def isoDT(dateCOL): return dateCOL.map(lambda x: x.ISO())
+def qlDT(dateCOL) : return dateCOL.map(lambda x: iDT(x) )
+def dfDSP(df, n=5, fm=fmS):    # n: numbers of line, fm: format vari.
+  nRow = min(n,int(len(df)/2)) 
+  sty  = pd.concat([df.head(nRow),df.tail(nRow)]).style
+  sty = sty.format(fm); display(sty)
 
 #---- E. 日付関連メソッドの短縮形 ----
 # Days, Weeks, Months, Years
@@ -137,10 +143,13 @@ SPL =  ql.Simple
 cmpdCMP =  ql.Compounded
 cmpdCNT =  ql.Continuous
 cmpdSPL =  ql.Simple
-# pay/recieve, put/call
-swPAY   = ql.Swap.Payer
-swRCV   = ql.Swap.Receiver
 
+# swap: pay/recieve, put/call
+swPAY   = ql.Swap.Payer       #  1
+swRCV   = ql.Swap.Receiver    # -1
+cpnRT0  = 0.0
+spdRT0  = 0.0
+gr1     = 1.0              # gearing
 # currency
 jpyFX   =  ql.JPYCurrency()
 usdFX   =  ql.USDCurrency()
@@ -155,18 +164,27 @@ cpn100  = 0.01
 cpn500  = 0.05
 bP      = ql.Protection.Buyer  # 0
 sP      = ql.Protection.Seller # 1
+# Lag
+lag0d    = 0
+lag1d    = 1
+lag2d    = 2
+lag3M    = ql.Period('3M')
+lag0M    = ql.Period('0M')
+
 # bond, CPI, クリーン価格等
 parPR    = 100.0
 parAMT   = 100.0
 cpiLNR   = ql.CPI.Linear
 cpiFLT   = ql.CPI.Flat
-ds9      = 9
-lag3M    = ql.Period('3M')
-lag0M    = ql.Period('0M')
+ds9      = 9            # shift days for JGBI
 gwOLY    = False
 reviseF  = False
 jpRegion = ql.CustomRegion("Japan", "JP")
 usRegion = ql.CustomRegion("USA",   "US")
 
-def cP(prc): return ql.BondPrice(prc, ql.BondPrice.Clean)
-def dP(prc): return ql.BondPrice(prc, ql.BondPrice.Dirty)
+def cP(prc):       return ql.BondPrice(prc, ql.BondPrice.Clean)
+def dP(prc):       return ql.BondPrice(prc, ql.BondPrice.Dirty)
+def sCF(amt,date): return ql.SimpleCashFlow(amt, date)
+# percent and basis points
+pct     =  1e-2
+bps     =  1e-4

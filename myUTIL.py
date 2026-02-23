@@ -1,32 +1,50 @@
-from myABBR import *
-from scipy.stats import norm
-  
-##### ショートカット #####
+from myABBR import * ; from scipy.stats import norm
+
+#-------------------------------------------------------  
+# ショートカット
+#-------------------------------------------------------
+
 # シンプルクォート
-def sqHDL(xx):   
-  '''sqHDL(xx)=ql.QuoteHandle(ql.SimpleQuote(xx))''' 
-  return ql.QuoteHandle(ql.SimpleQuote(xx))
+def sqHDL(xx): return ql.QuoteHandle(ql.SimpleQuote(xx))
 
 # フラットフォワード ** OBJとTSHの2つを戻す点に注意  **
 def ffTSH(settleDT, rate, dc=dcA365, cmpd=2, freq=1):   
-  '''ffTSH(settleDT,rate,dc=dcA365,cmpd=2,freq=1) 
-                                    = ffCrvOBJ,ql.YTS(ql.FlatForward(...))
-     cmpd=2:Continuous, 1:Compounded freq=1:Annual 2:Semiannual''' 
+  '''cmpd=2:Continuous, 1:Compounded freq=1:Annual 2:Semiannual''' 
   ffCrvOBJ = ql.FlatForward(settleDT, rate, dc, cmpd, freq)
   ffCrvOBJ.enableExtrapolation()
   return ffCrvOBJ, ql.YieldTermStructureHandle(ffCrvOBJ)
 
 # ブラックコンスタントボラTSハンドル
 def bVolTSH(tradeDT, vol, cal=calWK, dc=dcA365):   
-  '''bVolTSH(tradeDT, vol, cal=calWK, dc=dcA365)
-                                    =ql.BlackVolTSH(ql.BlackConstantVol(...))''' 
   return ql.BlackVolTermStructureHandle(
                     ql.BlackConstantVol(tradeDT, cal, vol, dc))
 
-##### 各種カーブオブジェクト作成 #####
+#-------------------------------------------------------  
+# カーブオブジェクト作成, カーブUtility 
+#-------------------------------------------------------
+
+# カーブ取引日、決済日等 表示
+def showCurveDate(ixOBJ, cvOBJ):        print(f'tradeDT:{getEvDT().ISO()}, ' 
+    f'settleDT:{cvOBJ.referenceDate().ISO()}, ' f'index:{ixOBJ.name()}')
+
+# ノード用データフレームDF作成 (parRTは1要素少ないので、[np.nan]を先頭に記述)
+def dfNodes(crvOBJ, parRT, isoFG=True, cmpd=CMP):
+  '''isoFG:ISO flag'''
+  dfCRV = pd.DataFrame({
+    'date':   dt,    'matYR': mY,            'parRT': pa,
+    'zeroRT': crvOBJ.zeroRate(mY, cmpd).rate(), 'DF': ds, 
+    } for (dt,ds),mY,pa in zip(crvOBJ.nodes(),crvOBJ.times(),[np.nan]+parRT))
+  if isoFG: dfCRV.date = isoDT(dfCRV.date)                    #日付をISOに変換
+  return dfCRV
+
+# アニュイティ計算
+def calcAnnuity(annSCD, crvOBJ, dc=dcA365): 
+    discFCT = nA([crvOBJ.discount(xx) for xx in annSCD][1:])
+    tnrLST  = np.diff([dc.yearFraction(annSCD.startDate(), xx) for xx in annSCD]) 
+    return np.sum(tnrLST * discFCT) 
+
 # SOFRカーブ 
 def makeSofrCurve(crvDATA):
-    '''makeSofrCurve(crvDATA)->[sofrIX,sfCrvOBJ,sfCrvHDL,sfParRT]'''      
   # 1.指標金利オブジェクトと初期値設定
     sfCrvHDL = ql.RelinkableYieldTermStructureHandle()  
     sofrIX = ql.Sofr(sfCrvHDL)
@@ -47,7 +65,6 @@ def makeSofrCurve(crvDATA):
   
 # TONAカーブ
 def makeTonaCurve(crvDATA):
-    '''makeTonaCurve(crvDATA)->[tonaIX,tnCrvOBJ,tnCrvHDL,tnParRT]'''
   # 1.指標金利オブジェクト
     tnCrvHDL = ql.RelinkableYieldTermStructureHandle()  
     tonaIX = ql.OvernightIndex('TONA', Tp0,  jpyFX, calJP, dcA365, tnCrvHDL)
@@ -66,7 +83,6 @@ def makeTonaCurve(crvDATA):
   
 # ESTRカーブ
 def makeEstrCurve(crvDATA):
-  '''makeEstrCurve(crvDATA)->[esIX,esCrvOBJ,esCrvHDL,esParRT]'''
   # 1.指標金利オブジェクトと初期値設定
   esCrvHDL = ql.RelinkableYieldTermStructureHandle()  
   esIX     = ql.Estr(esCrvHDL)
@@ -82,32 +98,16 @@ def makeEstrCurve(crvDATA):
   esCrvOBJ = ql.PiecewiseLogLinearDiscount(Tp0, calEU, cHelper, dcA360)
   esCrvHDL.linkTo(esCrvOBJ) ; esCrvOBJ.enableExtrapolation()
   return esIX, esCrvOBJ, esCrvHDL, esParRT
-
-def makeTonaCurve(crvDATA):
-    '''makeTonaCurve(crvDATA)->[tonaIX,tnCrvOBJ,tnCrvHDL,tnParRT]'''
-  # 1.指標金利オブジェクト
-    tnCrvHDL = ql.RelinkableYieldTermStructureHandle()  
-    tonaIX = ql.OvernightIndex('TONA', Tp0, jpyFX, calJP, dcA365, tnCrvHDL)
-  # 2. カーブヘルパー
-    cHelper, tnParRT = [], []
-    for knd, tnr, rt in crvDATA:
-      if knd == 'depo':
-          cHelper.append(ql.DepositRateHelper(sqHDL(rt/100),tonaIX)) 
-      if knd == 'swap':
-          cHelper.append(ql.OISRateHelper(Tp2, pD(tnr), sqHDL(rt/100),tonaIX))
-      tnParRT.append(rt/100)                                # パーレート用リスト
-  # カーブオブジェクト
-    tnCrvOBJ = ql.PiecewiseLogLinearDiscount(Tp0, calJP, cHelper, dcA365)
-    tnCrvHDL.linkTo(tnCrvOBJ) ; tnCrvOBJ.enableExtrapolation()
-    return tonaIX, tnCrvOBJ, tnCrvHDL, tnParRT
   
 # TIBORカーブ
-def makeTiborCurve(crvDATA, dCRV=None):
-    '''makeTiborCurve(crvDATA,dCRV)->[tbrIX,tbCrvOBJ,tbCrvHDL,tbParRT]
-       dCRV:discount curve'''
+def makeTiborCurve(crvDATA, dCRV=None, iTNR=6):
+    '''dCRV:discount curve, iTNR: index Tenor'''
   # 1.指標金利オブジェクト
     tbCrvHDL = ql.RelinkableYieldTermStructureHandle() 
-    tbrIX    = ql.Tibor(pdFreqSA, tbCrvHDL)
+    if   iTNR == 1: tbrIX = ql.Tibor(pDfrqM, tbCrvHDL)
+    elif iTNR == 3: tbrIX = ql.Tibor(pDfrqQ, tbCrvHDL)
+    elif iTNR ==12: tbrIX = ql.Tibor(pDfrqA, tbCrvHDL)
+    else:           tbrIX = ql.Tibor(pDfrqSA,tbCrvHDL)
   # 2. HelperとTiborカーブオブジェクト
     cHelper, tbParRT = [], []
     for knd, tnr, rt in crvDATA:
@@ -125,7 +125,6 @@ def makeTiborCurve(crvDATA, dCRV=None):
 
 # Euriborカーブ
 def makeEuriborCurve(crvDATA):
-    '''makeEuriborCurve(crvDATA)->[ebrIX,ebCrvOBJ,ebCrvHDL,ebParRT]'''    
   # 1.指標金利オブジェクト
     ebCrvHDL = ql.RelinkableYieldTermStructureHandle() 
     ebrIX    = ql.Euribor(pdFreqSA, ebCrvHDL)
@@ -139,40 +138,16 @@ def makeEuriborCurve(crvDATA):
     ebCrvOBJ = ql.PiecewiseLogLinearDiscount(Tp2, calEU, cHelper, dc30)
     ebCrvHDL.linkTo(ebCrvOBJ) ; ebCrvOBJ.enableExtrapolation()
     return ebrIX, ebCrvOBJ, ebCrvHDL, ebParRT
-  
-# アニュイティ計算
-def calcAnnuity(annSCD, crvOBJ, dc=dcA365): 
-    '''calcAnnuity(annuitySCD, curveOBJ, dc=dcA365) -> Annuity)'''
-    discFCT = nA([crvOBJ.discount(xx) for xx in annSCD][1:])
-    tnrLST  = np.diff([dc.yearFraction(annSCD.startDate(), xx) for xx in annSCD]) 
-    return np.sum(tnrLST * discFCT) 
 
-##### Swap/債券/CDSキャッシュフロー表 #####
+#-------------------------------------------------------  
+# Swap/債券/CDSキャッシュフロー
+#-------------------------------------------------------
+
 # Swap
-def swapCashFlow(swapOBJ, curveOBJ, leg=1, dc=dcA365): 
-    '''swapCashFlow(swapOBJ, curveOBJ, leg=1:FLoat  0:Fix)-> DataFrame)''' 
+def swapCashFlow(swapOBJ, curveOBJ, leg=1, type='p', dc=dcA365): 
+    '''leg=0:pay,1:rec   type='p':plain-Vani.,'t':tenor ''' 
     settleDT = curveOBJ.referenceDate() 
-    if leg == 1:  # 変動ﾚｸﾞ leg(1)
-        dfSWP = pd.DataFrame({
-            'fixDate': cpn.fixingDate().ISO(),
-            'accStart':cpn.accrualStartDate(),                # No ISO form
-            'accEnd':  cpn.accrualEndDate(),                  # No ISO form
-            'payDate': cpn.date(),                            # No ISO form
-            'days':    dc.dayCount(cpn.accrualStartDate(),cpn.accrualEndDate()),
-            'rate':    cpn.rate(),
-            'spread':  cpn.spread(),
-            'amount':  cpn.amount(),
-            } for cpn in map(ql.as_floating_rate_coupon, swapOBJ.leg(1)))
-        # マルチカーブのフォワード                                  1000は便宜上の数字
-        fwdRT = [curveOBJ.forwardRate(                         
-                        dfSWP.accStart[id],dfSWP.accEnd[id], dcA365, SPL).rate()
-                      if settleDT < dfSWP.accStart[id] else 1000 for id in dfSWP.index ] 
-        dfSWP = pd.concat([dfSWP, pd.DataFrame(fwdRT, columns=['fwdRT']) ], axis=1)
-        dfSWP.rate     = dfSWP.rate.where(dfSWP.fwdRT>999, dfSWP.fwdRT)
-        dfSWP          = dfSWP.drop('fwdRT', axis=1)
-        dfSWP.accStart = dfSWP.accStart.map(lambda x: x.ISO())
-        dfSWP.accEnd   = dfSWP.accEnd.map(lambda x: x.ISO())
-    else:          # 固定ﾚｸﾞ leg(0)
+    if type=='p' and leg==0:          # 固定ﾚｸﾞ leg(0)
         dfSWP = pd.DataFrame({
             'nominal':  cpn.nominal(),
             'accStart': cpn.accrualStartDate().ISO(),
@@ -182,6 +157,26 @@ def swapCashFlow(swapOBJ, curveOBJ, leg=1, dc=dcA365):
             'rate':     cpn.rate(),
             'amount':   cpn.amount()
             } for cpn in map(ql.as_fixed_rate_coupon, swapOBJ.leg(0)))
+    else:  # 変動ﾚｸﾞ
+        dfSWP = pd.DataFrame({
+            'fixDate': cpn.fixingDate().ISO(),
+            'accStart':cpn.accrualStartDate(),                # No ISO form
+            'accEnd':  cpn.accrualEndDate(),                  # No ISO form
+            'payDate': cpn.date(),                            # No ISO form
+            'days':    dc.dayCount(cpn.accrualStartDate(),cpn.accrualEndDate()),
+            'rate':    cpn.rate(),
+            'spread':  cpn.spread(),
+            'amount':  cpn.amount(),
+            } for cpn in map(ql.as_floating_rate_coupon, swapOBJ.leg(leg)))
+        # マルチカーブのフォワード                                  1000は便宜上の数字
+        fwdRT = [curveOBJ.forwardRate(                         
+                        dfSWP.accStart[id],dfSWP.accEnd[id], dcA365, SPL).rate()
+                      if settleDT < dfSWP.accStart[id] else 1000 for id in dfSWP.index ] 
+        dfSWP = pd.concat([dfSWP, pd.DataFrame(fwdRT, columns=['fwdRT']) ], axis=1)
+        dfSWP.rate     = dfSWP.rate.where(dfSWP.fwdRT>999, dfSWP.fwdRT)
+        dfSWP          = dfSWP.drop('fwdRT', axis=1)
+        dfSWP.accStart = dfSWP.accStart.map(lambda x: x.ISO())
+        dfSWP.accEnd   = dfSWP.accEnd.map(lambda x: x.ISO())
     # 起算日の挿入
     dfEFF = pd.DataFrame([{'payDate': swapOBJ.startDate()}], columns=dfSWP.columns)
     dfSWP = pd.concat([dfEFF, dfSWP], ignore_index=True)                
@@ -269,7 +264,6 @@ def cpiBondCashFlow(bondOBJ, ir='', yts='', past=0):
 
 # CDS
 def cdsCashFlow(cdsOBJ, hzCvOBJ, dsCvOBJ):
-    '''cdsCashFlow(cdsOBJ, hzCvOBJ, dsCvOBJ)-> DataFrame)'''    
     tradeDT, ntlAMT = cdsOBJ.tradeDate(), cdsOBJ.notional() 
     dfCDS = pd.DataFrame({
         'payDate':    cpn.date(),
@@ -308,7 +302,10 @@ def cdsCashFlow(cdsOBJ, hzCvOBJ, dsCvOBJ):
     dfCDS.accEnd  =  dfCDS.accEnd.map(lambda x:x.ISO())
     return dfCDS
 
-##### 債券オブジェクト 作成関数 ##### 
+#-------------------------------------------------------  
+# 債券オブジェクト
+#-------------------------------------------------------
+
 # テキスト143ページとは異なり、effDT,matDT はql.Date型、cpnRTは実数に変更
 # 関数から戻されるオブジェクトは nOBJ=1,2,3 で指定
 def makeJGB(effDT, matDT, cpnRT, faceAMT=100.0, nOBJ=1):
@@ -325,7 +322,11 @@ def makeUsTsy(effDT, matDT, cpnRT, faceAMT=100.0, nOBJ=1):
     if nOBJ==2: return tsyOBJ, tsySCD
     else      : return tsyOBJ
 
-##### JGB クラス #####    
+#-------------------------------------------------------  
+# クラス 追加
+#-------------------------------------------------------
+
+# JGB クラス
 # ・matDSで使うsettlementDate()はevaluationDateで変わるため、
 #   matDSは動的な計算が必要。
 # ・@propertyはメソッド(メンバ関数)をメンバ変数のように
@@ -360,7 +361,7 @@ class JGB(ql.FixedRateBond):
                                    # accuracy guess xMin  xMax 
       return ql.Brent().solve(prSLVR, 1e-6,   sYLD, -0.1, 1.0)
     
-##### ノーマルモデル クラス #####
+# ノーマルモデル クラス
 class normalCalculator:
     ''' Bachelier normal model class
         normalCalculator(payOffObj, matDT, futRT, volRT, rfOBJ)    
@@ -371,7 +372,7 @@ class normalCalculator:
       self.trdDT_ = ql.Settings.instance().evaluationDate        
       self.matYR_ = dcA365.yearFraction(self.trdDT_, matDT)
       # ペイオフ
-      self.pC_    = payOffObj.optionType()
+      self.pC_    = payOffObj.optionTyp()
       self.stkRT_ = payOffObj.strike()
       # 満期日DF、カーブオブジェクト
       self.matDF_ = rfOBJ.discount(matDT)

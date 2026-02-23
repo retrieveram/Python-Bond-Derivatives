@@ -2,7 +2,7 @@
 
 ### (a) ダウンロード方法、質問と要望
 - 上のファイル群はトップにある緑色の`<>Code`アイコンから`Download ZIP`の選択でダウンロード
-- 拡張子`ipynb`がJupyter Notebook用のファイルで、`myABBR.py`と`myUtil.py`はipynbと同じディレクトリに置く
+- 拡張子`ipynb`がJupyter Notebook用のファイルで、`myABBR.py`と`myUTIL.py`はipynbと同じディレクトリに置く
 - その他の拡張子`py`のファイルは主にxlwings用で、Excelファイルと同じディレクトリに置く
   - (別のディレクトリに置く方法はch00.ipynb ファイルの補足1を参照)
 - myABBR.pyとmyUtil.pyは随時更新予定。ファイル名に"オリジナル"とあるファイルが補足章と同じもの

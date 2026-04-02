@@ -1,78 +1,81 @@
 from myABBR import * ; from scipy.stats import norm
 
-#-------------------------------------------------------  
-# ショートカット
 #-------------------------------------------------------
-
-# シンプルクォート
-def sqHDL(xx): return ql.QuoteHandle(ql.SimpleQuote(xx))
-
-# フラットフォワード ** OBJとTSHの2つを戻す点に注意  **
-def ffTSH(settleDT, rate, dc=dcA365, cmpd=2, freq=1):   
-  '''cmpd=2:Continuous, 1:Compounded freq=1:Annual 2:Semiannual''' 
-  ffCrvOBJ = ql.FlatForward(settleDT, rate, dc, cmpd, freq)
-  ffCrvOBJ.enableExtrapolation()
-  return ffCrvOBJ, ql.YieldTermStructureHandle(ffCrvOBJ)
-
-# ブラックコンスタントボラTSハンドル
-def bVolTSH(tradeDT, vol, cal=calWK, dc=dcA365):   
-  return ql.BlackVolTermStructureHandle(
-                    ql.BlackConstantVol(tradeDT, cal, vol, dc))
-
-#-------------------------------------------------------  
-# カーブオブジェクト作成, カーブUtility 
+# カーブUtility
 #-------------------------------------------------------
 
 # カーブ取引日、決済日等 表示
-def showCurveDate(ixOBJ, cvOBJ):        print(f'tradeDT:{getEvDT().ISO()}, ' 
-    f'settleDT:{cvOBJ.referenceDate().ISO()}, ' f'index:{ixOBJ.name()}')
+def showCvDT(cvOBJ, ixOBJ=None):
+   print(f'tradeDT:{getEvDT().ISO()}, '
+         f'settleDT:{cvOBJ.referenceDate().ISO()} ', end='')
+   if ixOBJ is not None: print (f'(index:{ixOBJ.name()} )')
 
 # ノード用データフレームDF作成 (parRTは1要素少ないので、[np.nan]を先頭に記述)
 def dfNodes(crvOBJ, parRT, isoFG=True, cmpd=CMP):
   '''isoFG:ISO flag'''
   dfCRV = pd.DataFrame({
     'date':   dt,    'matYR': mY,            'parRT': pa,
-    'zeroRT': crvOBJ.zeroRate(mY, cmpd).rate(), 'DF': ds, 
+    'zeroRT': crvOBJ.zeroRate(mY, cmpd).rate(), 'DF': ds,
     } for (dt,ds),mY,pa in zip(crvOBJ.nodes(),crvOBJ.times(),[np.nan]+parRT))
   if isoFG: dfCRV.date = isoDT(dfCRV.date)                    #日付をISOに変換
   return dfCRV
 
 # アニュイティ計算
-def calcAnnuity(annSCD, crvOBJ, dc=dcA365): 
+def calcAnnuity(annSCD, crvOBJ, dc=dcA365):
     discFCT = nA([crvOBJ.discount(xx) for xx in annSCD][1:])
-    tnrLST  = np.diff([dc.yearFraction(annSCD.startDate(), xx) for xx in annSCD]) 
-    return np.sum(tnrLST * discFCT) 
+    tnrLST  = np.diff([dc.yearFraction(annSCD.startDate(), xx) for xx in annSCD])
+    return np.sum(tnrLST * discFCT)
 
-# SOFRカーブ 
+#-------------------------------------------------------
+# カーブオブジェクト作成
+#-------------------------------------------------------
+
+# ブラックコンスタントボラTSハンドル
+def makeBvol(tradeDT, vol, cal=calWK, dc=dcA365):
+  return ql.BlackVolTermStructureHandle(
+                    ql.BlackConstantVol(tradeDT, cal, vol, dc))
+
+# フラットフォワード ** OBJとTSHの2つを戻す点に注意  **
+def makeFF(settleDT, rate, dc=dcA365, cmpd=2, freq=1):
+  '''cmpd=2:Continuous, 1:Compounded freq=1:Annual 2:Semiannual'''
+  ffCrvOBJ = ql.FlatForward(settleDT, rate, dc, cmpd, freq)
+  ffCrvOBJ.enableExtrapolation()
+  return ffCrvOBJ, ql.YieldTermStructureHandle(ffCrvOBJ)
+
+ffTSH = makeFF ; bVolTSH = makeBvol                # 古い名前
+def sqHDL(xx): return sQH(xx)                      # myABBRでsQHを定義
+
+# SOFRカーブ
 def makeSofrCurve(crvDATA):
   # 1.指標金利オブジェクトと初期値設定
-    sfCrvHDL = ql.RelinkableYieldTermStructureHandle()  
+    sfCrvHDL = ql.RelinkableYieldTermStructureHandle()
     sofrIX = ql.Sofr(sfCrvHDL)
   # 2. HelperとSOFRカーブオブジェクト
     cHelper, sfParRT = [], []
     for knd, tnr, rt in crvDATA:  # tnr=(0:month,1:year,2:freq) for futures
         if knd == 'depo':
-            if ql.Period(tnr).length() == 1:
-                cHelper.append(ql.DepositRateHelper(sqHDL(rt/100),sofrIX)) 
+            if pD(tnr).length() == 1:
+                cHelper.append(ql.DepositRateHelper(sqHDL(rt/100),sofrIX))
         if knd == 'fut': cHelper.append(
             ql.SofrFutureRateHelper(sqHDL(rt),tnr[0],tnr[1],tnr[2]))
         if knd == 'swap': cHelper.append(
-            ql.OISRateHelper(Tp2, ql.Period(tnr),sqHDL(rt/100),sofrIX))
+            ql.OISRateHelper(Tp2, pD(tnr),sqHDL(rt/100),sofrIX))
         sfParRT.append(rt/100)                             # パーレート用リスト
     sfCrvOBJ = ql.PiecewiseLogLinearDiscount(Tp0, calUSs, cHelper, dcA360)
     sfCrvHDL.linkTo(sfCrvOBJ) ; sfCrvOBJ.enableExtrapolation()
     return sofrIX, sfCrvOBJ, sfCrvHDL, sfParRT
-  
+
 # TONAカーブ
 def makeTonaCurve(crvDATA):
   # 1.指標金利オブジェクト
-    tnCrvHDL = ql.RelinkableYieldTermStructureHandle()  
-    tonaIX = ql.OvernightIndex('TONA', Tp0,  jpyFX, calJP, dcA365, tnCrvHDL)
+    tnCrvHDL = ql.RelinkableYieldTermStructureHandle()
+    tonaIX   = ql.Tonar(tnCrvHDL)
+    #tonaIX = ql.OvernightIndex('TONA', Tp0,  jpyFX, calJP, dcA365, tnCrvHDL)
   # 2. カーブヘルパー
     cHelper, tnParRT = [], []
     for knd, tnr, rt in crvDATA:
       if knd == 'depo':
-          cHelper.append(ql.DepositRateHelper(sqHDL(rt/100),tonaIX)) 
+          cHelper.append(ql.DepositRateHelper(sqHDL(rt/100),tonaIX))
       if knd == 'swap':
           cHelper.append(ql.OISRateHelper(Tp2, pD(tnr), sqHDL(rt/100),tonaIX))
       tnParRT.append(rt/100)                                # パーレート用リスト
@@ -80,30 +83,30 @@ def makeTonaCurve(crvDATA):
     tnCrvOBJ = ql.PiecewiseLogLinearDiscount(Tp0, calJP, cHelper, dcA365)
     tnCrvHDL.linkTo(tnCrvOBJ) ; tnCrvOBJ.enableExtrapolation()
     return tonaIX, tnCrvOBJ, tnCrvHDL, tnParRT
-  
+
 # ESTRカーブ
 def makeEstrCurve(crvDATA):
   # 1.指標金利オブジェクトと初期値設定
-  esCrvHDL = ql.RelinkableYieldTermStructureHandle()  
+  esCrvHDL = ql.RelinkableYieldTermStructureHandle()
   esIX     = ql.Estr(esCrvHDL)
   # 2. HelperとSOFRカーブオブジェクト
   cHelper, esParRT = [], []
   for knd, tnr, rt in crvDATA:
       if knd == 'depo':
-          cHelper.append(ql.DepositRateHelper(sqHDL(rt/100),esIX)) 
+          cHelper.append(ql.DepositRateHelper(sqHDL(rt/100),esIX))
       if knd == 'swap':
           cHelper.append(ql.OISRateHelper(Tp2,pD(tnr),sqHDL(rt/100),esIX))
       esParRT.append(rt/100)                             # パーレート用リスト
-  # カーブオブジェクト      
+  # カーブオブジェクト
   esCrvOBJ = ql.PiecewiseLogLinearDiscount(Tp0, calEU, cHelper, dcA360)
   esCrvHDL.linkTo(esCrvOBJ) ; esCrvOBJ.enableExtrapolation()
   return esIX, esCrvOBJ, esCrvHDL, esParRT
-  
+
 # TIBORカーブ
 def makeTiborCurve(crvDATA, dCRV=None, iTNR=6):
     '''dCRV:discount curve, iTNR: index Tenor'''
   # 1.指標金利オブジェクト
-    tbCrvHDL = ql.RelinkableYieldTermStructureHandle() 
+    tbCrvHDL = ql.RelinkableYieldTermStructureHandle()
     if   iTNR == 1: tbrIX = ql.Tibor(pDfrqM, tbCrvHDL)
     elif iTNR == 3: tbrIX = ql.Tibor(pDfrqQ, tbCrvHDL)
     elif iTNR ==12: tbrIX = ql.Tibor(pDfrqA, tbCrvHDL)
@@ -111,12 +114,12 @@ def makeTiborCurve(crvDATA, dCRV=None, iTNR=6):
   # 2. HelperとTiborカーブオブジェクト
     cHelper, tbParRT = [], []
     for knd, tnr, rt in crvDATA:
-      if knd == 'depo': cHelper.append(ql.DepositRateHelper(sqHDL(rt/100),     tbrIX)) 
+      if knd == 'depo': cHelper.append(ql.DepositRateHelper(sqHDL(rt/100),     tbrIX))
       if knd == 'fra' : cHelper.append(ql.FraRateHelper (sqHDL(rt/100),pD(tnr),tbrIX))
-      if knd == 'swap': 
+      if knd == 'swap':
         if dCRV: cHelper.append(ql.SwapRateHelper(sqHDL(rt/100), pD(tnr), calJP,
                         frqSA, mFLLW, dcA365, tbrIX, sqHDL(0), pD('0d'), dCRV))
-        else:    cHelper.append(ql.SwapRateHelper(sqHDL(rt/100), pD(tnr), calJP, 
+        else:    cHelper.append(ql.SwapRateHelper(sqHDL(rt/100), pD(tnr), calJP,
                         frqSA, mFLLW, dcA365, tbrIX,))
       tbParRT.append(rt/100)                            # パーレート用リスト
     tbCrvOBJ = ql.PiecewiseLogLinearDiscount(Tp2, calJP, cHelper, dcA365)
@@ -126,12 +129,12 @@ def makeTiborCurve(crvDATA, dCRV=None, iTNR=6):
 # Euriborカーブ
 def makeEuriborCurve(crvDATA):
   # 1.指標金利オブジェクト
-    ebCrvHDL = ql.RelinkableYieldTermStructureHandle() 
+    ebCrvHDL = ql.RelinkableYieldTermStructureHandle()
     ebrIX    = ql.Euribor(pdFreqSA, ebCrvHDL)
   # 2. HelperとTONAカーブオブジェクト
     cHelper, ebParRT = [], []
     for knd, tnr, rt in crvDATA:
-       if knd == 'depo': cHelper.append(ql.DepositRateHelper(sqHDL(rt/100),ebrIX)) 
+       if knd == 'depo': cHelper.append(ql.DepositRateHelper(sqHDL(rt/100),ebrIX))
        if knd == 'swap': cHelper.append(ql.SwapRateHelper(   sqHDL(rt/100),
                                        pD(tnr), calEU, frqA, mFLLW, dc30, ebrIX))
        ebParRT.append(rt/100)                            # パーレート用リスト
@@ -139,14 +142,14 @@ def makeEuriborCurve(crvDATA):
     ebCrvHDL.linkTo(ebCrvOBJ) ; ebCrvOBJ.enableExtrapolation()
     return ebrIX, ebCrvOBJ, ebCrvHDL, ebParRT
 
-#-------------------------------------------------------  
-# Swap/債券/CDSキャッシュフロー
+#-------------------------------------------------------
+# Swap / leg / 債券 / CDSキャッシュフロー
 #-------------------------------------------------------
 
 # Swap
-def swapCashFlow(swapOBJ, curveOBJ, leg=1, type='p', dc=dcA365): 
-    '''leg=0:pay,1:rec   type='p':plain-Vani.,'t':tenor ''' 
-    settleDT = curveOBJ.referenceDate() 
+def swapCashFlow(swapOBJ, curveOBJ, leg=1, dc=dcA365, type='p'):
+    '''leg=0:pay,1:rec   type='p':plain-Vani.,'t':tenor '''
+    settleDT = curveOBJ.referenceDate()
     if type=='p' and leg==0:          # 固定ﾚｸﾞ leg(0)
         dfSWP = pd.DataFrame({
             'nominal':  cpn.nominal(),
@@ -156,7 +159,8 @@ def swapCashFlow(swapOBJ, curveOBJ, leg=1, type='p', dc=dcA365):
             'days':     dc.dayCount(cpn.accrualStartDate(),cpn.accrualEndDate()),
             'rate':     cpn.rate(),
             'amount':   cpn.amount()
-            } for cpn in map(ql.as_fixed_rate_coupon, swapOBJ.leg(0)))
+            } for cpn in map(ql.as_fixed_rate_coupon, swapOBJ.leg(0))
+                                                              if cpn is not None)
     else:  # 変動ﾚｸﾞ
         dfSWP = pd.DataFrame({
             'fixDate': cpn.fixingDate().ISO(),
@@ -167,30 +171,77 @@ def swapCashFlow(swapOBJ, curveOBJ, leg=1, type='p', dc=dcA365):
             'rate':    cpn.rate(),
             'spread':  cpn.spread(),
             'amount':  cpn.amount(),
-            } for cpn in map(ql.as_floating_rate_coupon, swapOBJ.leg(leg)))
+            } for cpn in map(ql.as_floating_rate_coupon, swapOBJ.leg(leg))
+                                                            if cpn is not None)
         # マルチカーブのフォワード                                  1000は便宜上の数字
-        fwdRT = [curveOBJ.forwardRate(                         
+        fwdRT = [curveOBJ.forwardRate(
                         dfSWP.accStart[id],dfSWP.accEnd[id], dcA365, SPL).rate()
-                      if settleDT < dfSWP.accStart[id] else 1000 for id in dfSWP.index ] 
+                      if settleDT < dfSWP.accStart[id] else 1000 for id in dfSWP.index ]
         dfSWP = pd.concat([dfSWP, pd.DataFrame(fwdRT, columns=['fwdRT']) ], axis=1)
         dfSWP.rate     = dfSWP.rate.where(dfSWP.fwdRT>999, dfSWP.fwdRT)
         dfSWP          = dfSWP.drop('fwdRT', axis=1)
-        dfSWP.accStart = dfSWP.accStart.map(lambda x: x.ISO())
-        dfSWP.accEnd   = dfSWP.accEnd.map(lambda x: x.ISO())
-    # 起算日の挿入
+        dfSWP.accStart = isoDT(dfSWP.accStart)
+        dfSWP.accEnd   = isoDT(dfSWP.accEnd)
+    # 起算日, 元本
     dfEFF = pd.DataFrame([{'payDate': swapOBJ.startDate()}], columns=dfSWP.columns)
-    dfSWP = pd.concat([dfEFF, dfSWP], ignore_index=True)                
+    dfPRN = pd.DataFrame({'payDate': cf.date(), 'amount':cf.amount()} for cf,cpn
+                in zip(swapOBJ.leg(leg),map(ql.as_coupon, swapOBJ.leg(leg)))
+                                                                if cpn is None )
+    dfSWP = pd.concat([dfEFF, dfSWP, dfPRN], ignore_index=True)
     # ディスカウントファクター(DF)
     psDF = [1.0                   for dt in dfSWP.payDate if dt <= settleDT] # past   DF
     fuDF = [curveOBJ.discount(dt) for dt in dfSWP.payDate if settleDT < dt ] # future DF
     dfSWP = pd.concat([dfSWP, pd.DataFrame(psDF+fuDF, columns=['DF']) ], axis=1)
-    dfSWP.payDate = dfSWP.payDate.map(lambda x: x.ISO())                        # ISOへ
+    dfSWP.payDate = isoDT(dfSWP.payDate)
     return dfSWP
 
+# leg キャッシュフロー (引数：キャッシュフロータプル、戻り値：)
+# SimpleCashFlowは amout, date, hasOccured ３つのメソッドのみ
+# SimpleCashFlowのdateメソッドでソート
+# as_floating_rate_coupon でキャスト
+def legCashFlow(legLST, curveOBJ, leg=1, dc=dcA365, doSort=True):
+    '''leg=0:pay,1:rec '''
+    settleDT = curveOBJ.referenceDate()
+    if leg==0:          # 固定ﾚｸﾞ leg(0)
+      dfCF = pd.DataFrame({
+        'nominal':  cpn.nominal(),
+        'accStart': cpn.accrualStartDate().ISO(),
+        'accEnd':   cpn.accrualEndDate().ISO(),
+        'payDate':  cpn.date(),
+        'days':     dc.dayCount(cpn.accrualStartDate(),cpn.accrualEndDate()),
+        'rate':     cpn.rate(),
+        'amount':   cpn.amount()
+      } for cpn in map(ql.as_fixed_rate_coupon, legLST) if cpn is not None)
+    else:  # 変動ﾚｸﾞ
+      dfCF = pd.DataFrame({
+        'fixDate': cpn.fixingDate().ISO(),
+        'accStart':cpn.accrualStartDate(),                # No ISO form
+        'accEnd':  cpn.accrualEndDate(),                  # No ISO form
+        'payDate': cpn.date(),                            # No ISO form
+        'days':    dc.dayCount(cpn.accrualStartDate(),cpn.accrualEndDate()),
+        'nominal': cpn.nominal(),
+        'rate':    cpn.rate(),
+        'spread':  cpn.spread(),
+        'amount':  cpn.amount(),
+      } for cpn in map(ql.as_floating_rate_coupon, legLST) if cpn is not None)
+    # 元本
+    dfPRN = pd.DataFrame({'payDate': cf.date(), 'amount':cf.amount()} for cf,cpn
+                in zip(legLST,map(ql.as_coupon, legLST))   if cpn is None )
+    dfCF = pd.concat([dfCF, dfPRN], ignore_index=True)
+    # ディスカウントファクター(DF)
+    psDF = [1.0                   for dt in dfCF.payDate if dt <= settleDT] # past   DF
+    fuDF = [curveOBJ.discount(dt) for dt in dfCF.payDate if settleDT < dt ] # future DF
+    dfCF = pd.concat([dfCF, pd.DataFrame(psDF+fuDF, columns=['DF']) ], axis=1)
+    # ソート、修飾等
+    if doSort: dfCF = dfCF.sort_values('payDate').reset_index(drop=True)
+    dfCF.accStart = isoDT(dfCF.accStart) ; dfCF.accEnd = isoDT(dfCF.accEnd)
+    dfCF.payDate  = isoDT(dfCF.payDate)
+    return dfCF
+
 # 債券 (past=0は過去キャッシュフローの非表示)
-def bondCashFlow(bondOBJ, ir='', yts='', past=0):    
+def bondCashFlow(bondOBJ, ir='', yts='', past=0):
     '''1:(ir='',yts='')=No DF      2:(ir=irOBJ, yts='')=ir DF
-       3:(ir='', yts=ytOBJ)=yt DF  
+       3:(ir='', yts=ytOBJ)=yt DF
        4:( , ,past=0)=futureCF      5:( , ,past=1)=past+futureCF    '''
     dfCPN = pd.DataFrame({
         'payDate':  cpn.date(),          # no ISO
@@ -201,62 +252,62 @@ def bondCashFlow(bondOBJ, ir='', yts='', past=0):
         } for cpn in map(ql.as_coupon, bondOBJ.cashflows()) if cpn is not None )
     # 起算日, 元本
     dfEFF = pd.DataFrame([{'payDate': bondOBJ.startDate()}], columns=dfCPN.columns)
-    dfPRN = pd.DataFrame({'payDate': cf.date(), 'amount':cf.amount()} for cf,cpn 
-                in zip(bondOBJ.cashflows(),map(ql.as_coupon, bondOBJ.cashflows())) 
+    dfPRN = pd.DataFrame({'payDate': cf.date(), 'amount':cf.amount()} for cf,cpn
+                in zip(bondOBJ.cashflows(),map(ql.as_coupon, bondOBJ.cashflows()))
                                                                 if cpn is None )
-    dfBND = pd.concat([dfEFF, dfCPN, dfPRN], ignore_index=True) 
+    dfBND = pd.concat([dfEFF, dfCPN, dfPRN], ignore_index=True)
     # ディスカウントファクター列作成
     settleDT = bondOBJ.settlementDate()
     psDF = [1.0       for dt in dfBND.payDate if dt <= settleDT]     #past DF
     # future DF
     if ir != '' and yts == '' :                                     # irtOBJ
       fuDF = [ir.discountFactor(settleDT, dt)
-                      for dt in dfBND.payDate if settleDT < dt ] 
+                      for dt in dfBND.payDate if settleDT < dt ]
       dfBND = pd.concat([dfBND, pd.DataFrame(psDF+fuDF, columns=['DF']) ], axis=1)
     elif yts != '' :                                                  # ytsOBJ
       fuDF = [yts.discount(dt)
-                      for dt in dfBND.payDate if settleDT < dt ] 
+                      for dt in dfBND.payDate if settleDT < dt ]
       dfBND = pd.concat([dfBND, pd.DataFrame(psDF+fuDF, columns=['DF']) ], axis=1)
     # 将来キャッシュフローの抽出
-    if past == 0: 
+    if past == 0:
       dfBND = dfBND[dfBND.payDate >= settleDT]
       dfBND = dfBND.reset_index(drop=True)              #インデックス番号リセット
     dfBND.payDate  =  dfBND.payDate.map(lambda x: x.ISO())  # ISOフォーマットへ
     return dfBND
 
 # 物価連動債 (past=0は過去キャッシュフローの非表示)
-def cpiBondCashFlow(bondOBJ, ir='', yts='', past=0):    
+def cpiBondCashFlow(bondOBJ, ir='', yts='', past=0):
     '''1:(ir='',yts='')=No DF      2:(ir=irOBJ, yts='')=ir DF
-       3:(ir='', yts=ytOBJ)=yt DF  
+       3:(ir='', yts=ytOBJ)=yt DF
        4:( , ,past=0)=futureCF      5:( , ,past=1)=past+futureCF    '''
     dfCPN = pd.DataFrame({
         'payDate':  cpn.date(),          # no ISO
         'accStart': cpn.accrualStartDate().ISO(),
         'accEnd':   cpn.accrualEndDate().ISO(),
         'cpi':      cpn.indexFixing(),
-        'coupon':   cpn.rate(),        
+        'coupon':   cpn.rate(),
         'amount':   cpn.amount(),
         } for cpn in map(ql.as_cpi_coupon, bondOBJ.cashflows()) if cpn is not None )
     # 起算日, 元本
     dfEFF = pd.DataFrame([{'payDate': bondOBJ.startDate()}], columns=dfCPN.columns)
-    dfPRN = pd.DataFrame({'payDate': cf.date(), 'amount':cf.amount()} for cf,cpn 
-            in zip(bondOBJ.cashflows(),map(ql.as_cpi_coupon, bondOBJ.cashflows())) 
+    dfPRN = pd.DataFrame({'payDate': cf.date(), 'amount':cf.amount()} for cf,cpn
+            in zip(bondOBJ.cashflows(),map(ql.as_cpi_coupon, bondOBJ.cashflows()))
                                                                 if cpn is None )
-    dfBND = pd.concat([dfEFF, dfCPN, dfPRN], ignore_index=True) 
+    dfBND = pd.concat([dfEFF, dfCPN, dfPRN], ignore_index=True)
     # ディスカウントファクター列作成
     settleDT = bondOBJ.settlementDate()
     psDF = [1.0       for dt in dfBND.payDate if dt <= settleDT]     #past DF
     # future DF
     if ir != '' and yts == '' :                                     # irtOBJ
       fuDF = [ir.discountFactor(settleDT, dt)
-                      for dt in dfBND.payDate if settleDT < dt ] 
+                      for dt in dfBND.payDate if settleDT < dt ]
       dfBND = pd.concat([dfBND, pd.DataFrame(psDF+fuDF, columns=['DF']) ], axis=1)
     elif yts != '' :                                                  # ytsOBJ
       fuDF = [yts.discount(dt)
-                      for dt in dfBND.payDate if settleDT < dt ] 
+                      for dt in dfBND.payDate if settleDT < dt ]
       dfBND = pd.concat([dfBND, pd.DataFrame(psDF+fuDF, columns=['DF']) ], axis=1)
     # 将来キャッシュフローの抽出
-    if past == 0: 
+    if past == 0:
       dfBND = dfBND[dfBND.payDate >= settleDT]
       dfBND = dfBND.reset_index(drop=True)              #インデックス番号リセット
     dfBND.payDate  =  dfBND.payDate.map(lambda x: x.ISO())  # ISOフォーマットへ
@@ -264,7 +315,7 @@ def cpiBondCashFlow(bondOBJ, ir='', yts='', past=0):
 
 # CDS
 def cdsCashFlow(cdsOBJ, hzCvOBJ, dsCvOBJ):
-    tradeDT, ntlAMT = cdsOBJ.tradeDate(), cdsOBJ.notional() 
+    tradeDT, ntlAMT = cdsOBJ.tradeDate(), cdsOBJ.notional()
     dfCDS = pd.DataFrame({
         'payDate':    cpn.date(),
         'coupon':     cpn.rate(),
@@ -275,9 +326,9 @@ def cdsCashFlow(cdsOBJ, hzCvOBJ, dsCvOBJ):
         'amount':     cpn.amount(),
         } for cpn in map(ql.as_coupon, cdsOBJ.coupons()))
     # 起算日の挿入
-    dfEFF = pd.DataFrame([{'payDate': cdsOBJ.protectionStartDate(), 
+    dfEFF = pd.DataFrame([{'payDate': cdsOBJ.protectionStartDate(),
                     'accEnd': cdsOBJ.protectionStartDate()}], columns=dfCDS.columns)
-    dfCDS = pd.concat([dfEFF, dfCDS], ignore_index=True)            
+    dfCDS = pd.concat([dfEFF, dfCDS], ignore_index=True)
     #ディスカウントファクター
     psDF  = [1.0                  for dt in dfCDS.payDate if dt <= tradeDT] #past   DF
     fuDF  = [dsCvOBJ.discount(dt) for dt in dfCDS.payDate if tradeDT < dt ] #future DF
@@ -285,9 +336,9 @@ def cdsCashFlow(cdsOBJ, hzCvOBJ, dsCvOBJ):
     #生存確率QとdQ
     psQ   = [1.0                             for dt in dfCDS.accEnd if dt <= tradeDT]
     fuQ   = [hzCvOBJ.survivalProbability(dt) for dt in dfCDS.accEnd if tradeDT < dt ]
-    dfCDS = pd.concat([dfCDS, pd.DataFrame(psQ+fuQ, columns=['Q']) ], axis=1) 
-    dQ    = np.insert(np.diff(dfCDS.Q)*(-1), 0, 0) 
-    dfCDS = pd.concat([dfCDS, pd.DataFrame( dict(dQ=dQ)) ], axis=1) 
+    dfCDS = pd.concat([dfCDS, pd.DataFrame(psQ+fuQ, columns=['Q']) ], axis=1)
+    dQ    = np.insert(np.diff(dfCDS.Q)*(-1), 0, 0)
+    dfCDS = pd.concat([dfCDS, pd.DataFrame( dict(dQ=dQ)) ], axis=1)
     # mid計算
     midDTs  = dfCDS.payDate[:-1]+(np.diff(dfCDS.payDate)/2).astype('int')
     midDFs  = [dsCvOBJ.discount(dd) for dd in midDTs]
@@ -296,13 +347,13 @@ def cdsCashFlow(cdsOBJ, hzCvOBJ, dsCvOBJ):
     dfDFQm.mDate = dfDFQm.mDate.map(lambda x: x.ISO())
     dfDFQm  = pd.concat([pd.DataFrame(columns=['mDate'],index=[0]),     #空の行を追加
                                                         dfDFQm],ignore_index=True)
-    dfCDS   = pd.concat([dfCDS, dfDFQm ], axis=1)  
+    dfCDS   = pd.concat([dfCDS, dfDFQm ], axis=1)
     #日付修正(ISOフォーマット)
     dfCDS.payDate =  dfCDS.payDate.map(lambda x:x.ISO())
     dfCDS.accEnd  =  dfCDS.accEnd.map(lambda x:x.ISO())
     return dfCDS
 
-#-------------------------------------------------------  
+#-------------------------------------------------------
 # 債券オブジェクト
 #-------------------------------------------------------
 
@@ -322,7 +373,7 @@ def makeUsTsy(effDT, matDT, cpnRT, faceAMT=100.0, nOBJ=1):
     if nOBJ==2: return tsyOBJ, tsySCD
     else      : return tsyOBJ
 
-#-------------------------------------------------------  
+#-------------------------------------------------------
 # クラス 追加
 #-------------------------------------------------------
 
@@ -333,10 +384,10 @@ def makeUsTsy(effDT, matDT, cpnRT, faceAMT=100.0, nOBJ=1):
 #   見せるデコレータで、matDSメソッドは使用される毎に再計算する。
 # ・メンバ変数のself.cpnRTは初期値固定で十分。(再計算の必要なし)
 class JGB(ql.FixedRateBond):
-    def __init__(self, settDS, faceAMT, bondSCD,cpn, dcBond, 
+    def __init__(self, settDS, faceAMT, bondSCD,cpn, dcBond,
                  paymentConvention=ql.Following,
                  redemption=100.0, issueDate=ql.Date()      ):
-      super().__init__(settDS, faceAMT, bondSCD, cpn, dcBond, 
+      super().__init__(settDS, faceAMT, bondSCD, cpn, dcBond,
                  paymentConvention, redemption, issueDate   )
       self.cpnRT = ql.as_coupon(self.cashflows()[0]).rate()
     # self.matDS = dcA365n.dayCount(self.settlementDate(), ...)
@@ -350,26 +401,26 @@ class JGB(ql.FixedRateBond):
 
     def SimpleYield(self, clnPR):                # 実数を戻す
         return  ( 100*(365+ self.cpnRT*self.matDS)/clnPR - 365 )/self.matDS
-    
+
     def JapanCompoundYield(self, clnPR):
-      sYLD = self.SimpleYield(clnPR) 
+      sYLD = self.SimpleYield(clnPR)
       def prSLVR(yld):
           CY  = self.cpnRT / yld
           DF  = (1 + yld/frqSA)**(-self.matDS*frqSA/365)
           PRC = 100*( CY + DF*(1-CY) )
           return PRC - clnPR
-                                   # accuracy guess xMin  xMax 
+                                   # accuracy guess xMin  xMax
       return ql.Brent().solve(prSLVR, 1e-6,   sYLD, -0.1, 1.0)
-    
+
 # ノーマルモデル クラス
 class normalCalculator:
     ''' Bachelier normal model class
-        normalCalculator(payOffObj, matDT, futRT, volRT, rfOBJ)    
+        normalCalculator(payOffObj, matDT, futRT, volRT, rfOBJ)
         matYR:満期日, SD:Standard Deviation,  DF:discFactor.'''
 
     def __init__(self, payOffObj, matDT, futRT, volRT, rfOBJ):
       # 満期年
-      self.trdDT_ = ql.Settings.instance().evaluationDate        
+      self.trdDT_ = ql.Settings.instance().evaluationDate
       self.matYR_ = dcA365.yearFraction(self.trdDT_, matDT)
       # ペイオフ
       self.pC_    = payOffObj.optionTyp()
@@ -382,11 +433,11 @@ class normalCalculator:
       self.futRT_ = futRT
 
     # SD: 標準偏差関数
-    def SD(self, volRT = None, matYR=None): 
+    def SD(self, volRT = None, matYR=None):
         volRT = volRT or self.volRT_ ; matYR = matYR or self.matYR_
         return volRT*np.sqrt(matYR)
     # dd: d1関数
-    def dd(self, futRT = None, volRT = None, matYR = None): 
+    def dd(self, futRT = None, volRT = None, matYR = None):
         futRT = futRT or self.futRT_ ; volRT = volRT or self.volRT_
         matYR = matYR or self.matYR_
         return self.pC_*(futRT - self.stkRT_)/self.SD(volRT, matYR)
@@ -395,6 +446,6 @@ class normalCalculator:
         futRT = futRT or self.futRT_; volRT = volRT or self.volRT_
         matYR = matYR or self.matYR_
         matDF = self.matDF_ if matYR == self.matYR_ \
-                            else self.rfOBJ_.discount(matYR*360/365)        
-        d1 = self.dd(futRT, volRT, matYR) 
+                            else self.rfOBJ_.discount(matYR*360/365)
+        d1 = self.dd(futRT, volRT, matYR)
         return matDF*self.SD(volRT,matYR)*(d1*norm.cdf(d1) + norm.pdf(d1))

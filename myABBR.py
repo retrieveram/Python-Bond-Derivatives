@@ -1,9 +1,9 @@
 #---- A. ライブラリーインポート ----
 import QuantLib          as ql
-import datetime          as dt 
+import datetime          as dt
 import pandas            as pd
-import numpy             as np 
-import matplotlib.pyplot as plt 
+import numpy             as np
+import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import warnings          #警告の非表示用(pandas ilocで止める)
 from functools import singledispatch   #関数オーバーロード用
@@ -15,36 +15,38 @@ plt.rcParams.update({"font.family"   :"MS Gothic",
                      "figure.figsize":[4.5,2.5]})
 
 #---- C. numpy初期設定 5桁表示と配列短縮形, 切捨て ----
-np.set_printoptions(precision=5,suppress=True) 
+np.set_printoptions(precision=5,suppress=True)
 def nSetP(dgt=5):                     # %5桁表示設定
   fmt = '{:.' + str(dgt) + '%}'
-  np.set_printoptions(formatter={'float':fmt.format}) 
+  np.set_printoptions(formatter={'float':fmt.format})
 def nSetF(dgt=5):                     # float5桁表示設定
-  np.set_printoptions(precision=dgt,suppress=True) 
+  np.set_printoptions(precision=dgt,suppress=True)
 def nA(LIST):        return np.array(LIST)
 def rD(xx,digits=0): return np.floor(xx * 10**digits)/10**digits #切捨て
 def rU(xx,digits=0): return np.ceil (xx * 10**digits)/10**digits #切上げ
 
 #---- D. pandas スタイル書式用変数, 日付列変換, df表示 ----
-fmS = {'amount':'{:,.2f}',   'atmFWD':'{:.6%}',   'coupon':'{:.6%}',
-       'days':'{:.0f}',      'DF':'{:.8f}',       'fwdRT':'{:.6%}',
-       'nominal':'{:,.2f}',  'NPV':'{:,.2f}',     'matYR':'{:,.4f}',
-       'parRT':'{:.6%}',     'rate':'{:.6%}',     'rfrDF':'{:.8f}',             
-       'shftRT':'{:.6%}',    'spread':'{:.3%}',   'zeroRT':'{:.6%}', }
-fmB = {'accruAMT':'{:,.4f}', 'amount':'{:,.4f}',  'BPV':'{:.4f}',
-       'CF':'{:.5f}',        'cleanPRC':'{:.4f}', 'coupon':'{:.4%}',
-       'dirtyPRC':'{:.4f}',  'gBASIS':'{:.4f}',   'yield':'{:.4f}' }
+fmS = {'amount' :'{:,.2f}',  'atmFWD':'{:.6%}' ,  'coupon':'{:.6%}' ,
+       'days'   :'{:.0f}' ,  'DF'    :'{:.8f}' ,  'fwdRT' :'{:.6%}' ,
+       'nominal':'{:,.2f}',  'NPV'   :'{:,.2f}',  'matYR' :'{:,.4f}',
+       'parRT'  :'{:.6%}' ,  'rate'  :'{:.6%}' ,  'rfrDF' :'{:.8f}' ,
+       'shftRT' :'{:.6%}' ,  'spread':'{:.3%}' ,  'zeroRT':'{:.6%}' ,}
+fmB = {'accruAMT':'{:,.4f}', 'amount'  :'{:,.4f}', 'BPV'  :'{:.4f}',
+       'CF'      :'{:.5f}' , 'cleanPRC':'{:.4f}' ,'coupon':'{:.4%}',
+       'dirtyPRC':'{:.4f}' , 'gBASIS'  :'{:.4f}' , 'yield':'{:.4f}', }
 fmtSCF, fmtFUT = fmS, fmB                              # for old vari.
-def isoDT(dateCOL): return dateCOL.map(lambda x: x.ISO())
-def qlDT(dateCOL) : return dateCOL.map(lambda x: iDT(x) )
+def isoDT(dateCOL):
+      return dateCOL.map(lambda x: x.ISO() if not pd.isna(x) else x)
+def qlDT(dateCOL) :
+      return dateCOL.map(lambda x: iDT(x)  if not pd.isna(x) else x)
 def dfDSP(df, n=5, fm=fmS):    # n: numbers of line, fm: format vari.
-  nRow = min(n,int(len(df)/2)) 
+  nRow = min(n, (len(df)+1)//2 )
   sty  = pd.concat([df.head(nRow),df.tail(nRow)]).style
-  sty = sty.format(fm); display(sty)
+  sty  = sty.format(fm); display(sty)
 
 #---- E. 日付関連メソッドの短縮形 ----
 # Days, Weeks, Months, Years
-DD = ql.Days ;  WW = ql.Weeks ;  MM = ql.Months ;  YY = ql.Years
+DD = ql.Days; WW = ql.Weeks; MM = ql.Months; YY = ql.Years
 # euro日付
 def eDT(dd,mm,yyyy): return ql.Date(dd,mm,yyyy)
 # japan日付
@@ -55,14 +57,19 @@ def uDT(mm,dd,yyyy): return ql.Date(dd,mm,yyyy)
 def dDT(dateTIME):   return ql.Date().from_date(dateTIME)
 # iso日付
 def iDT(isoDT):      return ql.Date(isoDT, '%Y-%m-%d')
-# 曜日
-def dayOfWeek(Date): return Date.to_date().strftime('%a')
+# 曜日 day of week
+def dWK(Date): return Date.to_date().strftime('%a')
+# xxx.advance( , , DD)等
+def adD(cal,dt,nn) : return cal.advance(dt, nn, DD)
+def adW(cal,dt,nn) : return cal.advance(dt, nn, WW)
+def adM(cal,dt,nn) : return cal.advance(dt, nn, MM)
+def adY(cal,dt,nn) : return cal.advance(dt, nn, YY)
 # 月初と月末の日付、月の日数
 def bDTmm(d) :       return ql.Date(1, d.month(), d.year())
 def eDTmm(d) :       return d.endOfMonth(d)
 def dsMM(d)  :       return ql.Date.endOfMonth(d).dayOfMonth()
 # SettingクラスevaluationDate設定、取得
-def setEvDT(evaluationDT):  
+def setEvDT(evaluationDT):
   ql.Settings.instance().evaluationDate = evaluationDT
 def getEvDT():       return ql.Settings.instance().evaluationDate
 
@@ -72,7 +79,7 @@ def pD(pdSTR: str): return ql.Period(pdSTR)  # Period('3M')
 @pD.register(tuple)
 def _(nnUNT):       return ql.Period(*nnUNT) # Period((3,MM))
 @pD.register(int)
-def _(FRQ):         return ql.Period(FRQ)    # Period(freqQ) 
+def _(FRQ):         return ql.Period(FRQ)    # Period(freqQ)
 
 
 #---- F. 短縮形リスト ----
@@ -181,10 +188,14 @@ gwOLY    = False
 reviseF  = False
 jpRegion = ql.CustomRegion("Japan", "JP")
 usRegion = ql.CustomRegion("USA",   "US")
-
 def cP(prc):       return ql.BondPrice(prc, ql.BondPrice.Clean)
 def dP(prc):       return ql.BondPrice(prc, ql.BondPrice.Dirty)
-def sCF(amt,date): return ql.SimpleCashFlow(amt, date)
+
 # percent and basis points
 pct     =  1e-2
 bps     =  1e-4
+
+# シンプルクォート、シンプルキャッシュフロー
+def sQ(xx):        return ql.SimpleQuote(xx)
+def sQH(xx):       return ql.QuoteHandle(sQ(xx))
+def sCF(amt,date): return ql.SimpleCashFlow(amt, date)

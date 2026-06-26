@@ -196,7 +196,7 @@ def swapCashFlow(swapOBJ, curveOBJ, leg=1, dc=dcA365, type='p'):
     return dfSWP
 
 # leg キャッシュフロー (引数：キャッシュフロータプル、戻り値：)
-# SimpleCashFlowは amout, date, hasOccured ３つのメソッドのみ
+# SimpleCashFlowは amount, date, hasOccured ３つのメソッドのみ
 # SimpleCashFlowのdateメソッドでソート
 # as_floating_rate_coupon でキャスト
 def legCashFlow(legLST, curveOBJ, leg=1, dc=dcA365, doSort=True):

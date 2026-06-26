@@ -1,12 +1,12 @@
 #---- A. ライブラリーインポート ----
 import QuantLib          as ql
-import datetime          as dt
 import pandas            as pd
 import numpy             as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import warnings          #警告の非表示用(pandas ilocで止める)
 from functools import singledispatch   #関数オーバーロード用
+from datetime  import date as dt
 
 #---- B. matplotlib初期設定  ----
 #     日本語フォントとサイズ、グラフサイズ
@@ -34,14 +34,18 @@ fmS = {'amount' :'{:,.2f}',  'atmFWD':'{:.6%}' ,  'coupon':'{:.6%}' ,
 fmB = {'accruAMT':'{:,.4f}', 'amount'  :'{:,.4f}', 'BPV'  :'{:.4f}',
        'CF'      :'{:.5f}' , 'cleanPRC':'{:.4f}' ,'coupon':'{:.4%}',
        'dirtyPRC':'{:.4f}' , 'gBASIS'  :'{:.4f}' , 'yield':'{:.4f}', }
-fmtSCF, fmtFUT = fmS, fmB                              # for old vari.
+fmO = {'Amount' :'{:,.2f}','Coupon':'{:.6%}','Notional':'{:,.2f}',
+       'DiscountFactor':'{:.8f}','PresentValue':'{:,.2f}' }  # for ORE
+fmtSCF, fmtFUT = fmS, fmB                                # for old vari.
+def pdDT (dateCOL): return pd.to_datetime(dateCOL)
 def isoDT(dateCOL):
       return dateCOL.map(lambda x: x.ISO() if not pd.isna(x) else x)
 def qlDT(dateCOL) :
       return dateCOL.map(lambda x: iDT(x)  if not pd.isna(x) else x)
 def dfDSP(df, n=5, fm=fmS):    # n: numbers of line, fm: format vari.
   nRow = min(n, (len(df)+1)//2 )
-  sty  = pd.concat([df.head(nRow),df.tail(nRow)]).style
+  tmp  = pd.concat([df.head(nRow),df.tail(nRow)])
+  sty = tmp.loc[~tmp.index.duplicated(keep="first")].style
   sty  = sty.format(fm); display(sty)
 
 #---- E. 日付関連メソッドの短縮形 ----
@@ -56,7 +60,8 @@ def uDT(mm,dd,yyyy): return ql.Date(dd,mm,yyyy)
 # datetimeクラスからQL Date
 def dDT(dateTIME):   return ql.Date().from_date(dateTIME)
 # iso日付
-def iDT(isoDT):      return ql.Date(isoDT, '%Y-%m-%d')
+def iDT (isoDT):      return ql.Date(isoDT, '%Y-%m-%d')
+def iDTd(isoDT):      return dt.fromisoformat(isoDT)
 # 曜日 day of week
 def dWK(Date): return Date.to_date().strftime('%a')
 # xxx.advance( , , DD)等
@@ -111,6 +116,7 @@ frqSA  =  ql.Semiannual              # 2
 frqQ   =  ql.Quarterly               # 4
 frqM   =  ql.Monthly                 # 12
 frqD   =  ql.Daily                   # 365
+frq0   =  ql.NoFrequency             # 0  for ql.Continuous
 # OLD-freqency
 freqA   =  ql.Annual                  # 1
 freqSA  =  ql.Semiannual              # 2
@@ -151,9 +157,11 @@ cmpdCMP =  ql.Compounded
 cmpdCNT =  ql.Continuous
 cmpdSPL =  ql.Simple
 
-# swap: pay/recieve, put/call
+# swap: pay/recieve, option: put/call
 swPAY   = ql.Swap.Payer       #  1
 swRCV   = ql.Swap.Receiver    # -1
+opCL    = ql.Option.Call      #  1
+opPT    = ql.Option.Put       # -1
 cpnRT0  = 0.0
 spdRT0  = 0.0
 gr1     = 1.0              # gearing
@@ -199,3 +207,11 @@ bps     =  1e-4
 def sQ(xx):        return ql.SimpleQuote(xx)
 def sQH(xx):       return ql.QuoteHandle(sQ(xx))
 def sCF(amt,date): return ql.SimpleCashFlow(amt, date)
+
+# 乱数object
+def uniRNG(nSeed):
+   return ql.UniformRandomGenerator(nSeed)
+def uniSeqRNG(nSeed, nRnd):
+   return ql.UniformRandomSequenceGenerator(nRnd, uniRNG(nSeed))
+def gsSeqRNG(nSeed, nRnd):
+   return ql.GaussianRandomSequenceGenerator(uniSeqRNG(nSeed,nRnd))

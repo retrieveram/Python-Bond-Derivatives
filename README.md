@@ -20,7 +20,7 @@
 - [第9回：Tonar vs 3mTibor テナースワップ](https://qiita.com/retrieveram/items/0fb4b768d056aecbe2f7)  (Apr04,2026)
 - [第10回：USD担保 JPYカーブのコード (CSAベース)](https://qiita.com/retrieveram/items/91c8b87f60598c066c3b)  (May06,2026)
 - [第11回：USD担保 JPYカーブの理論 (測度変換の利用)](https://qiita.com/retrieveram/items/6b8eabb4ea2c278a3e79)  (May11,2026)
-- [第12回：SOFR vs TONA ベーシス スワップ](https://qiita.com/retrieveram/items/8875c2e63f5a5c3391f2)(June26,2026) 
+- [第12回：SOFR vs TONA ベーシス スワップ](https://qiita.com/retrieveram/items/8875c2e63f5a5c3391f2)  (June26,2026) 
 
 ### (c) 正誤表  
 

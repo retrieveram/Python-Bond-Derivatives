@@ -5,15 +5,31 @@ import numpy             as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import warnings          #警告の非表示用(pandas ilocで止める)
-from functools import singledispatch   #関数オーバーロード用
-from datetime  import date as dt
+from functools   import singledispatch   #関数オーバーロード用
+from datetime    import date as dt
+from scipy.stats import norm
 
 #---- B. matplotlib初期設定  ----
-#     日本語フォントとサイズ、グラフサイズ
+# 日本語フォントとサイズ、グラフサイズ
+# xNum:x軸の表示個数  xRot:x軸表示角度 yPct:y軸 %  yFlt:y軸少数桁数 gdShow:グリッドshow
 plt.rcParams.update({"font.family"   :"MS Gothic",
                      "font.size"     :9,
                      "figure.figsize":[4.5,2.5]})
-
+def xNum(ax, num=10):                                  # x軸の表示項目数を指定
+  for aa in np.atleast_1d(ax): aa.xaxis.set_major_locator(mtick.MaxNLocator(num))
+def xRot(ax, angle=45):                                # x軸の表示項目の角度を指定
+  for aa in np.atleast_1d(ax): aa.tick_params(axis='x', labelrotation=angle)
+def yPct(ax, decimals=3, ymax=1):                      # yPct:y軸を%表示 yFlt:少数桁数を指定
+  ax.yaxis.set_major_formatter(mtick.PercentFormatter(ymax,decimals))
+def yFlt(ax, decimals=2): ax.yaxis.set_major_formatter(
+                    mtick.StrMethodFormatter(f'{{x:,.{decimals}f}}'))
+def gdShow(ax,linewidth=1):
+  for aa in np.atleast_1d(ax): aa.grid(linestyle='--',linewidth=1)
+  plt.tight_layout(); plt.show()
+def lgD(ax):                                          # labelの指定の有無をチェック
+  for aa in np.atleast_1d(ax):
+    hdl,_ = aa.get_legend_handles_labels()
+    if hdl: aa.legend()
 #---- C. numpy初期設定 5桁表示と配列短縮形, 切捨て ----
 np.set_printoptions(precision=5,suppress=True)
 def nSetP(dgt=5):                     # %5桁表示設定
@@ -25,7 +41,12 @@ def nA(LIST):        return np.array(LIST)
 def rD(xx,digits=0): return np.floor(xx * 10**digits)/10**digits #切捨て
 def rU(xx,digits=0): return np.ceil (xx * 10**digits)/10**digits #切上げ
 
-#---- D. pandas スタイル書式用変数, 日付列変換, df表示 ----
+#---- D. pandas 表示設定, スタイル書式用変数, df表示, 日付列変換 ----
+# pd.set_option("display.precision",10)
+def colMn(): pd.set_option('display.max_columns', None)         # 列数の上限なし
+def colM (): pd.set_option('display.max_columns')               # 元の設定に戻す
+def dspW (n=None): pd.set_option('display.width', n)            # 表示幅をn文字数
+colMn(); dspW(95)                                               # 初期設定
 fmS = {'amount' :'{:,.2f}',  'atmFWD':'{:.6%}' ,  'coupon':'{:.6%}' ,
        'days'   :'{:.0f}' ,  'DF'    :'{:.8f}' ,  'fwdRT' :'{:.6%}' ,
        'nominal':'{:,.2f}',  'NPV'   :'{:,.2f}',  'matYR' :'{:,.4f}',
@@ -34,19 +55,43 @@ fmS = {'amount' :'{:,.2f}',  'atmFWD':'{:.6%}' ,  'coupon':'{:.6%}' ,
 fmB = {'accruAMT':'{:,.4f}', 'amount'  :'{:,.4f}', 'BPV'  :'{:.4f}',
        'CF'      :'{:.5f}' , 'cleanPRC':'{:.4f}' ,'coupon':'{:.4%}',
        'dirtyPRC':'{:.4f}' , 'gBASIS'  :'{:.4f}' , 'yield':'{:.4f}', }
-fmO = {'Amount' :'{:,.2f}','Coupon':'{:.6%}','Notional':'{:,.2f}',
-       'DiscountFactor':'{:.8f}','PresentValue':'{:,.2f}' }  # for ORE
+fmO = {'Amount' :'{:,.2f}','Base NPV':'{:,.2f}','NPV':'{:,.2f}',
+       'Coupon':'{:.6%}','Delta': '{:,.2f}',
+       'DiscountFactor':'{:.8f}','Gamma': '{:,.2f}', 'val': '{:,.2f}',
+       'MaturityTime':'{:.2f}','Notional':'{:,.2f}',
+       'PresentValue':'{:,.2f}','ShiftSize_1':'{:.4%}' }  # for ORE
+fmE = {'EPE' :'{:,.2f}','ENE':'{:,.2f}','AllocatedEPE':'{:,.2f}',
+       'AllocatedENE' :'{:,.2f}','PFE':'{:,.2f}','BaselEE':'{:,.2f}',
+       'BaselEEE':'{:,.2f}','TimeWeightedBaselEPE': '{:,.2f}',
+       'TimeWeightedBaselEEPE': '{:,.2f}'}  # for Exposure
+fmX = {'CVA':'{:,.2f}','DVA':'{:,.2f}','FBA':'{:,.2f}','FCA':'{:,.2f}',
+       'FBAexOwnSP':'{:,.2f}','FCAexOwnSP':'{:,.2f}','FBAexAllSP':'{:,.2f}',
+       'FCAexAllSP':'{:,.2f}','COLVA':'{:,.2f}','MVA':'{:,.2f}',
+       'OurKVACCR':'{:,.2f}','TheirKVACCR':'{:,.2f}','OurKVACVA':'{:,.2f}',
+       'TheirKVACVA':'{:,.2f}','CollateralFloor':'{:,.2f}',
+       'AllocatedCVA':'{:,.2f}','AllocatedDVA':'{:,.2f}',
+       'BaselEPE':'{:,.2f}','BaselEEPE':'{:,.2f}'}  # for XVA
+oeSENSI = ['TradeId','Factor_1','Currency','Base NPV','ShiftSize_1',
+           'Delta','Gamma']
+oeCF    = ['TradeId','LegNo','PayDate','AccrualStartDate',
+           'AccrualEndDate','Coupon','Amount', 'DiscountFactor']
 fmtSCF, fmtFUT = fmS, fmB                                # for old vari.
-def pdDT (dateCOL): return pd.to_datetime(dateCOL)
-def isoDT(dateCOL):
-      return dateCOL.map(lambda x: x.ISO() if not pd.isna(x) else x)
-def qlDT(dateCOL) :
-      return dateCOL.map(lambda x: iDT(x)  if not pd.isna(x) else x)
 def dfDSP(df, n=5, fm=fmS):    # n: numbers of line, fm: format vari.
   nRow = min(n, (len(df)+1)//2 )
   tmp  = pd.concat([df.head(nRow),df.tail(nRow)])
   sty = tmp.loc[~tmp.index.duplicated(keep="first")].style
   sty  = sty.format(fm); display(sty)
+def dfSTL(dfxx, fm=fmS): display(dfxx.style.format(fm))
+def dfSTLT(dfxx, fm=fmS):                          # 転置したdfのスタイル表示
+	styOB = dfxx.T.style
+	for col, fmt in fm.items():
+		styOB = styOB.format(fmt, subset=pd.IndexSlice[col, :])
+	display( styOB )
+def pdDT (dateCOL): return pd.to_datetime(dateCOL)
+def isoDT(dateCOL):                                              # ql日付からiso日付へ
+      return dateCOL.map(lambda x: x.ISO() if not pd.isna(x) else x)
+def qlDT(dateCOL) :                                              # iso日付からql日付へ
+      return dateCOL.map(lambda x: iDT(x)  if not pd.isna(x) else x)
 
 #---- E. 日付関連メソッドの短縮形 ----
 # Days, Weeks, Months, Years
@@ -64,6 +109,8 @@ def iDT (isoDT):      return ql.Date(isoDT, '%Y-%m-%d')
 def iDTd(isoDT):      return dt.fromisoformat(isoDT)
 # 曜日 day of week
 def dWK(Date): return Date.to_date().strftime('%a')
+# dcXX.yearFraction(base,tgt)
+def yrF(dcOBJ,baseDT,tgtDT) : return dcOBJ.yearFraction(baseDT,tgtDT)
 # xxx.advance( , , DD)等
 def adD(cal,dt,nn) : return cal.advance(dt, nn, DD)
 def adW(cal,dt,nn) : return cal.advance(dt, nn, WW)
@@ -96,6 +143,7 @@ calUSg  =  ql.UnitedStates(ql.UnitedStates.GovernmentBond)
 calUSs  =  ql.UnitedStates(ql.UnitedStates.SOFR)
 calWK   =  ql.WeekendsOnly()
 calNL   =  ql.NullCalendar()
+calUJ   =  ql.JointCalendar(calUSf, calJP)
 # DayCounter
 dcA365  =  ql.Actual365Fixed()
 dcA365n =  ql.Actual365Fixed(ql.Actual365Fixed.NoLeap)
@@ -169,6 +217,9 @@ gr1     = 1.0              # gearing
 jpyFX   =  ql.JPYCurrency()
 usdFX   =  ql.USDCurrency()
 eurFX   =  ql.EURCurrency()
+jpyCY   =  ql.JPYCurrency()
+usdCY   =  ql.USDCurrency()
+eurCY   =  ql.EURCurrency()
 # CDS : recovery rate / coupon
 rcvRTz  = 0.0     # zero
 rcvRTj  = 0.35    # Japan
@@ -215,3 +266,5 @@ def uniSeqRNG(nSeed, nRnd):
    return ql.UniformRandomSequenceGenerator(nRnd, uniRNG(nSeed))
 def gsSeqRNG(nSeed, nRnd):
    return ql.GaussianRandomSequenceGenerator(uniSeqRNG(nSeed,nRnd))
+# エンジン セット
+def setPE(obj,eng): return obj.setPricingEngine(eng)

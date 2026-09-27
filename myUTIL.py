@@ -42,47 +42,70 @@ def makeFF(settleDT, rate, dc=dcA365, cmpd=2, freq=1):
   ffCrvOBJ.enableExtrapolation()
   return ffCrvOBJ, ql.YieldTermStructureHandle(ffCrvOBJ)
 
+# リネーム
 ffTSH = makeFF ; bVolTSH = makeBvol                # 古い名前
 def sqHDL(xx): return sQH(xx)                      # myABBRでsQHを定義
+
+# カーブ受渡日 変更
+def changeCvDT(crvHDL, newDT):
+  return ql.YieldTermStructureHandle(ql.ImpliedTermStructure(crvHDL, newDT))
 
 # SOFRカーブ
 def makeSofrCurve(crvDATA):
   # 1.指標金利オブジェクトと初期値設定
-    sfCrvHDL = ql.RelinkableYieldTermStructureHandle()
-    sofrIX = ql.Sofr(sfCrvHDL)
+    sfCvHDL = ql.RelinkableYieldTermStructureHandle()
+    sfIX = ql.Sofr(sfCvHDL)
   # 2. HelperとSOFRカーブオブジェクト
     cHelper, sfParRT = [], []
     for knd, tnr, rt in crvDATA:  # tnr=(0:month,1:year,2:freq) for futures
         if knd == 'depo':
             if pD(tnr).length() == 1:
-                cHelper.append(ql.DepositRateHelper(sqHDL(rt/100),sofrIX))
+                cHelper.append(ql.DepositRateHelper(sqHDL(rt/100),sfIX))
         if knd == 'fut': cHelper.append(
             ql.SofrFutureRateHelper(sqHDL(rt),tnr[0],tnr[1],tnr[2]))
         if knd == 'swap': cHelper.append(
-            ql.OISRateHelper(Tp2, pD(tnr),sqHDL(rt/100),sofrIX))
+            ql.OISRateHelper(Tp2, pD(tnr),sqHDL(rt/100),sfIX))
         sfParRT.append(rt/100)                             # パーレート用リスト
-    sfCrvOBJ = ql.PiecewiseLogLinearDiscount(Tp0, calUSs, cHelper, dcA360)
-    sfCrvHDL.linkTo(sfCrvOBJ) ; sfCrvOBJ.enableExtrapolation()
-    return sofrIX, sfCrvOBJ, sfCrvHDL, sfParRT
+    sfCvOBJ = ql.PiecewiseLogLinearDiscount(Tp0, calUSs, cHelper, dcA360)
+    sfCvHDL.linkTo(sfCvOBJ) ; sfCvOBJ.enableExtrapolation()
+    return sfIX, sfCvOBJ, sfCvHDL, sfParRT
 
 # TONAカーブ
 def makeTonaCurve(crvDATA):
   # 1.指標金利オブジェクト
-    tnCrvHDL = ql.RelinkableYieldTermStructureHandle()
-    tonaIX   = ql.Tonar(tnCrvHDL)
-    #tonaIX = ql.OvernightIndex('TONA', Tp0,  jpyFX, calJP, dcA365, tnCrvHDL)
+    tnCvHDL = ql.RelinkableYieldTermStructureHandle()
+    tnIX   = ql.Tonar(tnCvHDL)
+    #tnIX = ql.OvernightIndex('TONA', Tp0,  jpyFX, calJP, dcA365, tnCvHDL)
   # 2. カーブヘルパー
     cHelper, tnParRT = [], []
     for knd, tnr, rt in crvDATA:
       if knd == 'depo':
-          cHelper.append(ql.DepositRateHelper(sqHDL(rt/100),tonaIX))
+          cHelper.append(ql.DepositRateHelper(sqHDL(rt/100),tnIX))
       if knd == 'swap':
-          cHelper.append(ql.OISRateHelper(Tp2, pD(tnr), sqHDL(rt/100),tonaIX))
+          cHelper.append(ql.OISRateHelper(Tp2, pD(tnr), sqHDL(rt/100),tnIX))
       tnParRT.append(rt/100)                                # パーレート用リスト
   # カーブオブジェクト
-    tnCrvOBJ = ql.PiecewiseLogLinearDiscount(Tp0, calJP, cHelper, dcA365)
-    tnCrvHDL.linkTo(tnCrvOBJ) ; tnCrvOBJ.enableExtrapolation()
-    return tonaIX, tnCrvOBJ, tnCrvHDL, tnParRT
+    tnCvOBJ = ql.PiecewiseLogLinearDiscount(Tp0, calJP, cHelper, dcA365)
+    tnCvHDL.linkTo(tnCvOBJ) ; tnCvOBJ.enableExtrapolation()
+    return tnIX, tnCvOBJ, tnCvHDL, tnParRT
+
+# USD担保TONAカーブ
+def makeUsdTonaCurve(xcyBSS, jpySP, baseIX, othrIX, clltCv):
+  baseCLLT, baseBSS, baseRST, cHelper, fxParRT   =\
+  True,     False,   True,      [],     []
+  for kk, tt, bb in xcyBSS:
+    if kk == 'fxsw':
+      cHelper.append(ql.FxSwapRateHelper( sQH(bb*pct),sQH(jpySP),pD(tt),
+                                Tp2,calUJ,mFLLW,EoMf,baseCLLT,clltCv) )
+      fxParRT.append(bb*pct)
+    if kk == 'bss':
+      cHelper.append( ql.MtMCrossCurrencyBasisSwapRateHelper(
+                          sQH(bb*bps),pD(tt),Tp2,calUJ,mFLLW,EoMf,
+                          baseIX,othrIX,clltCv,baseCLLT,baseBSS,baseRST,frqQ))
+      fxParRT.append(bb*bps)
+  jBsCvOBJ = ql.PiecewiseLogLinearDiscount(Tp0,calUJ,cHelper,dcA365)
+  jBsCvHDL = ql.YieldTermStructureHandle(jBsCvOBJ)
+  return jBsCvOBJ, jBsCvHDL, fxParRT
 
 # ESTRカーブ
 def makeEstrCurve(crvDATA):
@@ -372,6 +395,14 @@ def makeUsTsy(effDT, matDT, cpnRT, faceAMT=100.0, nOBJ=1):
     tsyOBJ = ql.FixedRateBond(Tp1, faceAMT, tsySCD, [cpnRT], dcAAb)
     if nOBJ==2: return tsyOBJ, tsySCD
     else      : return tsyOBJ
+
+#-------------------------------------------------------
+# オプション関連
+#-------------------------------------------------------
+def vPoff(pc, stkPR): return ql.PlainVanillaPayoff(pc,stkPR)
+def excE(mDT):        return ql.EuropeanExercise(mDT)
+def excA(sDT,eDT):    return ql.AmericanExercise(sDT, eDT)
+def excB(dtLST):      return ql.BermudanExercise(dtLST)
 
 #-------------------------------------------------------
 # クラス 追加

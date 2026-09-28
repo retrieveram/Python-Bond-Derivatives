@@ -75,7 +75,7 @@ def makeTonaCurve(crvDATA):
   # 1.指標金利オブジェクト
     tnCvHDL = ql.RelinkableYieldTermStructureHandle()
     tnIX   = ql.Tonar(tnCvHDL)
-    #tnIX = ql.OvernightIndex('TONA', Tp0,  jpyFX, calJP, dcA365, tnCvHDL)
+    #tnIX = ql.OvernightIndex('TONA', Tp0,  jpyCY, calJP, dcA365, tnCvHDL)
   # 2. カーブヘルパー
     cHelper, tnParRT = [], []
     for knd, tnr, rt in crvDATA:

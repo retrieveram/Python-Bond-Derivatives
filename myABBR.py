@@ -214,9 +214,6 @@ cpnRT0  = 0.0
 spdRT0  = 0.0
 gr1     = 1.0              # gearing
 # currency
-jpyFX   =  ql.JPYCurrency()
-usdFX   =  ql.USDCurrency()
-eurFX   =  ql.EURCurrency()
 jpyCY   =  ql.JPYCurrency()
 usdCY   =  ql.USDCurrency()
 eurCY   =  ql.EURCurrency()

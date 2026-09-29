@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import warnings          #警告の非表示用(pandas ilocで止める)
 from functools   import singledispatch   #関数オーバーロード用
-from datetime    import date as dt
+import datetime as dt
 from scipy.stats import norm
 
 #---- B. matplotlib初期設定  ----

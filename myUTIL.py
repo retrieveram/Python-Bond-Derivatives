@@ -34,13 +34,18 @@ def calcAnnuity(annSCD, crvOBJ, dc=dcA365):
 def makeBvol(tradeDT, vol, cal=calWK, dc=dcA365):
   return ql.BlackVolTermStructureHandle(
                     ql.BlackConstantVol(tradeDT, cal, vol, dc))
+# ブラック バリアンスカーブ
+def makeVariCv(trdDT, volDT, volQT, dc=dcA365, forceFLG=False):
+  return ql.BlackVarianceCurve(trdDT, volDT, volQT, dc, forceFLG)
+
 
 # フラットフォワード ** OBJとTSHの2つを戻す点に注意  **
-def makeFF(settleDT, rate, dc=dcA365, cmpd=2, freq=1):
-  '''cmpd=2:Continuous, 1:Compounded freq=1:Annual 2:Semiannual'''
-  ffCrvOBJ = ql.FlatForward(settleDT, rate, dc, cmpd, freq)
+def makeFF(settleDT, rate, dc=dcA365, cmpd=2, freq=1, oHDL=False):
+  '''cmpd=2:Continuous, 1:Compounded freq=1:Annual 2:Semiannual oHD:onlyHDL'''
+  ffCrvOBJ = ql.FlatForward(settleDT,rate,dc,cmpd,freq)
   ffCrvOBJ.enableExtrapolation()
-  return ffCrvOBJ, ql.YieldTermStructureHandle(ffCrvOBJ)
+  ffCrvHDL = ql.YieldTermStructureHandle(ffCrvOBJ);
+  return ffCrvHDL if oHDL else (ffCrvOBJ,ffCrvHDL)
 
 # リネーム
 ffTSH = makeFF ; bVolTSH = makeBvol                # 古い名前
@@ -81,8 +86,8 @@ def makeTonaCurve(crvDATA):
     for knd, tnr, rt in crvDATA:
       if knd == 'depo':
           cHelper.append(ql.DepositRateHelper(sqHDL(rt/100),tnIX))
-      if knd == 'swap':
-          cHelper.append(ql.OISRateHelper(Tp2, pD(tnr), sqHDL(rt/100),tnIX))
+      if knd == 'swap': cHelper.append(
+          ql.OISRateHelper(Tp2, pD(tnr), sqHDL(rt/100),tnIX))
       tnParRT.append(rt/100)                                # パーレート用リスト
   # カーブオブジェクト
     tnCvOBJ = ql.PiecewiseLogLinearDiscount(Tp0, calJP, cHelper, dcA365)
@@ -397,14 +402,6 @@ def makeUsTsy(effDT, matDT, cpnRT, faceAMT=100.0, nOBJ=1):
     else      : return tsyOBJ
 
 #-------------------------------------------------------
-# オプション関連
-#-------------------------------------------------------
-def vPoff(pc, stkPR): return ql.PlainVanillaPayoff(pc,stkPR)
-def excE(mDT):        return ql.EuropeanExercise(mDT)
-def excA(sDT,eDT):    return ql.AmericanExercise(sDT, eDT)
-def excB(dtLST):      return ql.BermudanExercise(dtLST)
-
-#-------------------------------------------------------
 # クラス 追加
 #-------------------------------------------------------
 
@@ -480,3 +477,37 @@ class normalCalculator:
                             else self.rfOBJ_.discount(matYR*360/365)
         d1 = self.dd(futRT, volRT, matYR)
         return matDF*self.SD(volRT,matYR)*(d1*norm.cdf(d1) + norm.pdf(d1))
+
+#-------------------------------------------------------
+# VannaVolga Interpolation
+#-------------------------------------------------------
+class VVInterpolation:
+  def __init__(self, STKs, Vols, spFX, dDF, fDF, mYR):
+    if not STKs[0] < STKs[1] < STKs[2]: raise ValueError('行使価格は昇順指定')
+
+    self.STKs, self.Vols, self.spFX, self.dDF, self.fDF, self.T =\
+     nA(STKs),  nA(Vols),      spFX,      dDF,      fDF,   mYR
+
+    self.atmVol,    self.fwd,   self.sqrtT =\
+    self.Vols[1], spFX*fDF/dDF, np.sqrt(mYR)
+
+    self.prcBS = nA([self._call(k,self.atmVol) for k in self.STKs])
+    self.prcMK = nA([self._call(k,v) for k,v in zip(self.STKs,self.Vols)])
+    self.Vegs  = nA([self._vega(k) for k in self.STKs])
+  def _call(self, k, v):
+    return ql.blackFormula(oCL,float(k),self.fwd,float(v)*self.sqrtT,self.dDF)
+  def _vega(self, k):
+    d1 = (np.log(self.fwd/k)+0.5*self.atmVol**2*self.T)/(self.atmVol*self.sqrtT)
+    return self.spFX*self.fDF*self.sqrtT*np.exp(-0.5*d1*d1)/np.sqrt(2*np.pi)
+    # return self.spFX*self.dDF*self.sqrtT*np.exp(-0.5*d1*d1)/np.sqrt(2*np.pi)
+  def __call__(self, XX, allowExtrapolation=False):
+    k1,k2,k3 = self.STKs
+    if not allowExtrapolation and not k1 <= XX <= k3:
+                                       raise ValueError('外挿は第2引数をTrue')
+    vk = self._vega(XX)
+    x1 = vk/self.Vegs[0]*np.log(k2/XX)*np.log(k3/XX)/(np.log(k2/k1)*np.log(k3/k1))
+    x2 = vk/self.Vegs[1]*np.log(XX/k1)*np.log(k3/XX)/(np.log(k2/k1)*np.log(k3/k2))
+    x3 = vk/self.Vegs[2]*np.log(XX/k1)*np.log(XX/k2)/(np.log(k3/k1)*np.log(k3/k2))
+    prc = self._call(XX,self.atmVol)+np.dot([x1,x2,x3],self.prcMK-self.prcBS)
+    return ql.blackFormulaImpliedStdDev(
+                          oCL,float(XX),self.fwd,float(prc),self.dDF)/self.sqrtT

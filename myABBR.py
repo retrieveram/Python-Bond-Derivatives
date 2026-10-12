@@ -23,13 +23,20 @@ def yPct(ax, decimals=3, ymax=1):                      # yPct:y軸を%表示 yFl
   ax.yaxis.set_major_formatter(mtick.PercentFormatter(ymax,decimals))
 def yFlt(ax, decimals=2): ax.yaxis.set_major_formatter(
                     mtick.StrMethodFormatter(f'{{x:,.{decimals}f}}'))
-def gdShow(ax,linewidth=1):
-  for aa in np.atleast_1d(ax): aa.grid(linestyle='--',linewidth=1)
-  plt.tight_layout(); plt.show()
+def hline(ax, tgtN):                                   # x=tgtNに水平線
+  ax.axhline(tgtN,color="black",linestyle="--",linewidth=0.5)
+def vline(ax, tgtN):                                   # x=tgtNに垂直線
+  ax.axvline(tgtN,color="black",linestyle=":",linewidth=0.5)
+def nbShow(ax, tgtN, locate=(-40,5)):                  # x=tgtNをグラフに表示
+  ax.annotate(f'{tgtN:.4f}',(tgtN,0),locate,'data','offset points')
 def lgD(ax):                                          # labelの指定の有無をチェック
   for aa in np.atleast_1d(ax):
     hdl,_ = aa.get_legend_handles_labels()
     if hdl: aa.legend()
+def gdShow(ax,linewidth=1):                            # グリッドshow
+  for aa in np.atleast_1d(ax): aa.grid(linestyle='--',linewidth=1)
+  plt.tight_layout(); plt.show()
+
 #---- C. numpy初期設定 5桁表示と配列短縮形, 切捨て ----
 np.set_printoptions(precision=5,suppress=True)
 def nSetP(dgt=5):                     # %5桁表示設定
@@ -210,6 +217,7 @@ swPAY   = ql.Swap.Payer       #  1
 swRCV   = ql.Swap.Receiver    # -1
 opCL    = ql.Option.Call      #  1
 opPT    = ql.Option.Put       # -1
+oCL,oPT = opCL, opPT          #重複
 cpnRT0  = 0.0
 spdRT0  = 0.0
 gr1     = 1.0              # gearing
@@ -247,9 +255,10 @@ usRegion = ql.CustomRegion("USA",   "US")
 def cP(prc):       return ql.BondPrice(prc, ql.BondPrice.Clean)
 def dP(prc):       return ql.BondPrice(prc, ql.BondPrice.Dirty)
 
-# percent and basis points
+# percent , basis points, nano
 pct     =  1e-2
 bps     =  1e-4
+nano    =  1e-9
 
 # シンプルクォート、シンプルキャッシュフロー
 def sQ(xx):        return ql.SimpleQuote(xx)
@@ -263,5 +272,23 @@ def uniSeqRNG(nSeed, nRnd):
    return ql.UniformRandomSequenceGenerator(nRnd, uniRNG(nSeed))
 def gsSeqRNG(nSeed, nRnd):
    return ql.GaussianRandomSequenceGenerator(uniSeqRNG(nSeed,nRnd))
-# エンジン セット
+def gsPathGEN(psOBJ,matYR,nSTEP,nSeed,BB=False):
+  return ql.GaussianPathGenerator(psOBJ,matYR,nSTEP,gsSeqRNG(nSeed,nSTEP),BB)
+def mtUniRNG(nSeed, nRnd):
+   return ql.MersenneTwisterUniformRsg(nRnd, nSeed)
+def mtGsRNG(nSeed, nRnd):
+   return ql.InvCumulativeMersenneTwisterGaussianRsg(mtUniRNG(nSeed,nRnd))
+
+#-------------------------------------------------------
+# オプション, プロセス, エンジン
+#-------------------------------------------------------
+def vPoff(pc, stkPR):       return ql.PlainVanillaPayoff(pc,stkPR)
+def excE(mDT):              return ql.EuropeanExercise(mDT)
+def excA(sDT,eDT):          return ql.AmericanExercise(sDT, eDT)
+def excB(dtLST):            return ql.BermudanExercise(dtLST)
+def euOPT(payOff, execize): return ql.EuropeanOption(payOff, execize)
+# プロセス, エンジン
+def gkPROC(spotHDL, fCvHDL, dCvHDL, volHDL):
+                    return ql.GarmanKohlagenProcess(spotHDL, fCvHDL, dCvHDL, volHDL)
+def anaEE(proc):    return ql.AnalyticEuropeanEngine(proc)
 def setPE(obj,eng): return obj.setPricingEngine(eng)

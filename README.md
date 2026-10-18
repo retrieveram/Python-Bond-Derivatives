@@ -22,6 +22,7 @@
 - [第11回：USD担保 JPYカーブの理論 (測度変換の利用)](https://qiita.com/retrieveram/items/6b8eabb4ea2c278a3e79)  (May11,2026)
 - [第12回：SOFR vs TONA ベーシス スワップ](https://qiita.com/retrieveram/items/8875c2e63f5a5c3391f2)  (June26,2026)
 - [第13回：FXフォワード](https://qiita.com/retrieveram/items/70fe7a6673f88b547b72) (Sep27,2026)
+- [第14回：FXオプション入門 ](https://qiita.com/retrieveram/items/f42f8c2176cd10a421a0) (Oct19,2026)
 
 ### (c) 正誤表  
 

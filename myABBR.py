@@ -27,8 +27,10 @@ def hline(ax, tgtN):                                   # x=tgtNに水平線
   ax.axhline(tgtN,color="black",linestyle="--",linewidth=0.5)
 def vline(ax, tgtN):                                   # x=tgtNに垂直線
   ax.axvline(tgtN,color="black",linestyle=":",linewidth=0.5)
-def nbShow(ax, tgtN, locate=(-40,5)):                  # x=tgtNをグラフに表示
+def nbShow(ax, tgtN, locate=(-40,5)):
   ax.annotate(f'{tgtN:.4f}',(tgtN,0),locate,'data','offset points')
+def nbShowY(ax, tgtN, locate=(0,0)):
+  ax.annotate(f'{tgtN:.4f}',(0,tgtN),locate,'data','offset points')
 def lgD(ax):                                          # labelの指定の有無をチェック
   for aa in np.atleast_1d(ax):
     hdl,_ = aa.get_legend_handles_labels()
@@ -218,6 +220,8 @@ swRCV   = ql.Swap.Receiver    # -1
 opCL    = ql.Option.Call      #  1
 opPT    = ql.Option.Put       # -1
 oCL,oPT = opCL, opPT          #重複
+sptDLT  = ql.DeltaVolQuote.Spot
+fwdDLT  = ql.DeltaVolQuote.Fwd
 cpnRT0  = 0.0
 spdRT0  = 0.0
 gr1     = 1.0              # gearing
@@ -267,17 +271,17 @@ def sCF(amt,date): return ql.SimpleCashFlow(amt, date)
 
 # 乱数object
 def uniRNG(nSeed):
-   return ql.UniformRandomGenerator(nSeed)
+  return ql.UniformRandomGenerator(nSeed)
 def uniSeqRNG(nSeed, nRnd):
-   return ql.UniformRandomSequenceGenerator(nRnd, uniRNG(nSeed))
+  return ql.UniformRandomSequenceGenerator(nRnd, uniRNG(nSeed))
 def gsSeqRNG(nSeed, nRnd):
-   return ql.GaussianRandomSequenceGenerator(uniSeqRNG(nSeed,nRnd))
+  return ql.GaussianRandomSequenceGenerator(uniSeqRNG(nSeed,nRnd))
 def gsPathGEN(psOBJ,matYR,nSTEP,nSeed,BB=False):
   return ql.GaussianPathGenerator(psOBJ,matYR,nSTEP,gsSeqRNG(nSeed,nSTEP),BB)
 def mtUniRNG(nSeed, nRnd):
-   return ql.MersenneTwisterUniformRsg(nRnd, nSeed)
+  return ql.MersenneTwisterUniformRsg(nRnd, nSeed)
 def mtGsRNG(nSeed, nRnd):
-   return ql.InvCumulativeMersenneTwisterGaussianRsg(mtUniRNG(nSeed,nRnd))
+  return ql.InvCumulativeMersenneTwisterGaussianRsg(mtUniRNG(nSeed,nRnd))
 
 #-------------------------------------------------------
 # オプション, プロセス, エンジン
